@@ -86,28 +86,32 @@
     done
   }
 
+  arch_chroot() {
+    arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
+  }
+
 check_connection
 
 pacman -Sy
 pacstrap -i ${MOUNTPOINT} base base-devel
 genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
 nano ${MOUNTPOINT}/etc/fstab
-arch-chroot ${MOUNTPOINT} /bin/bash
-sed -i '/'en_US.UTF-8'/s/^#//' /etc/locale.gen
-locale-gen
-echo LANG=en_US.UTF-8 > /etc/locale.conf
+arch_chroot "sed -i '/'en_US.UTF-8'/s/^#//' /etc/locale.gen"
+arch_chroot "locale-gen"
+echo LANG=en_US.UTF-8 > ${MOUNTPOINT}/etc/locale.conf
 export LANG=en_US.UTF-8
-echo "KEYMAP=dvorak" > /etc/vconsole.conf
-ln -s /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
-hwclock --systohc --utc
-echo arch-laptop > /etc/hostname
-sed -i '/127.0.0.1/s/$/ 'arch-laptop'/' /etc/hosts
-sed -i '/::1/s/$/ 'arch-laptop'/' /etc/hosts
-mkinitcpio -p linux
+echo "KEYMAP=dvorak" > ${MOUNTPOINT}/etc/vconsole.conf
+arch_chroot "ln -s /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime"
+arch_chroot "hwclock --systohc --utc"
+echo arch-laptop > ${MOUNTPOINT}/etc/hostname
+arch_chroot "sed -i '/127.0.0.1/s/$/ 'arch-laptop'/' /etc/hosts"
+arch_chroot "sed -i '/::1/s/$/ 'arch-laptop'/' /etc/hosts"
+arch_chroot "mkinitcpio -p linux"
 echo "${BLUE}enter your new root password${RESET}"
-passwd
+arch_chroot "passwd"
 package_install "grub os-prober"
-grub-install --target=i386-pc --recheck /dev/sda
+arch_chroot "grub-install --target=i386-pc --recheck /dev/sda"
+arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 
 package_install "
     kdebase
