@@ -77,19 +77,26 @@
     echo "${BLUE}installing packages:${RESET}"
     for PKG in ${1}; do
       if ! is_package_installed "${PKG}" ; then
-	echo -ne "${PKG} "
-	pacman -S --noconfirm --needed ${PKG} >>"$LOG" 2>&1 &
-	PID=$!;progress $PID
+        echo -ne "${PKG} "
+        pacman -S --noconfirm --needed ${PKG} >>"$LOG" 2>&1 &
+        PID=$!;progress $PID
       else
-	echo "${PKG} ${YELLOW}(already installed)${RESET}"
+        echo "${PKG} ${YELLOW}(already installed)${RESET}"
       fi
     done
   }
 
   package_install_chroot() {
-    arch-chroot ${MOUNTPOINT} /bin/bash
-    package_install "${1}"
-    exit
+    echo "${BLUE}installing packages:${RESET}"
+    for PKG in ${1}; do
+      if ! is_package_installed "${PKG}" ; then
+        echo -ne "${PKG} "
+        arch-chroot $MOUNTPOINT /bin/bash -c "pacman -S --noconfirm --needed ${PKG} >>"$LOG" 2>&1 &"
+        PID=$!;progress $PID
+      else
+        echo "${PKG} ${YELLOW}(already installed)${RESET}"
+      fi
+    done
   }
 
   arch_chroot() {
