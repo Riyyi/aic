@@ -8,6 +8,7 @@ else
 fi
 
 # VARIABLES
+  CONNECTION="wireless"         #(wired/wireless)
   LOCALE="en_US"
   KEYMAP="dvorak"               #(us)
   TIMEZONE="Europe/Amsterdam"
@@ -20,30 +21,65 @@ fi
     arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
   }
 
+check_connection
+
+# Update mirrorlist
 pacman -Sy
+
+# Install the base system
 pacstrap ${MOUNTPOINT} base base-devel
+
+case "$CONNECTION" in
+  wired)
+    arch_chroot "systemctl enable dhcpcd@${WIRED_DEV}.service"
+    break
+    ;;
+  wireless)
+    pacstrap ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant dialog
+    break
+    ;;
+
+# Generate an fstab
 genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
 nano ${MOUNTPOINT}/etc/fstab
+
+# Locale
 arch_chroot "sed -i '/'${LOCALE}.UTF-8'/s/^#//' /etc/locale.gen"
 arch_chroot "locale-gen"
 echo LANG=${LOCALE}.UTF-8 > ${MOUNTPOINT}/etc/locale.conf
 export LANG=${LOCALE}.UTF-8
+
+# Console keymap
 echo "KEYMAP=${KEYMAP}" > ${MOUNTPOINT}/etc/vconsole.conf
+
+# Time zone
 arch_chroot "ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
+
+# Hardware clock
 arch_chroot "hwclock --systohc --${HARDWARECLOCK}"
+
+# Hostname
 echo ${HOSTNAME} > ${MOUNTPOINT}/etc/hostname
 arch_chroot "sed -i '/127.0.0.1/s/$/ '${HOSTNAME}'/' /etc/hosts"
 arch_chroot "sed -i '/::1/s/$/ '${HOSTNAME}'/' /etc/hosts"
+
+# Create an initial ramdisk environment
 arch_chroot "mkinitcpio -p linux"
+
+# Install and configure a bootloader
 pacstrap ${MOUNTPOINT} grub os-prober
 arch_chroot "grub-install --target=i386-pc --recheck /dev/${INSTALLPARTITION}"
 arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
-cp -R `pwd` ${MOUNTPOINT}/root
-echo "${BLUE}enter your new root password${RESET}"
+
+# Set the root password
+echo "${BLUE}Enter your new root password${RESET}"
 arch_chroot "passwd"
 
-read -p "${BLUE}reboot system?${RESET}" x
-if [ x == "" ] || [ x == "y" ] || [ x == "Y" ]; then
+echo "${RED}A copy of RiyyiAUI will be placed in /root directory of your new system ${RESET}"
+cp -R `pwd` ${MOUNTPOINT}/root
+
+read -p "${BLUE}Reboot system?${RESET} " x
+if [ $x == "" ] || [ $x == "y" ] || [ $x == "Y" ]; then
   reboot
 else
   exit
