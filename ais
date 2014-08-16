@@ -42,8 +42,8 @@ cp -R `pwd` ${MOUNTPOINT}/root
 echo "${BLUE}enter your new root password${RESET}"
 arch_chroot "passwd"
 
-read -p "Reboot system?" x
-if [ x == "" || x == "y" || x == "Y" ]; then
+read -p "${BLUE}reboot system?${RESET}" x
+if [ x == "" ] || [ x == "y" ] || [ x == "Y" ]; then
   reboot
 else
   exit
