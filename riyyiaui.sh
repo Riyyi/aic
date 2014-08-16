@@ -109,11 +109,11 @@ arch_chroot "sed -i '/::1/s/$/ 'arch-laptop'/' /etc/hosts"
 arch_chroot "mkinitcpio -p linux"
 echo "${BLUE}enter your new root password${RESET}"
 arch_chroot "passwd"
-package_install "grub os-prober"
+pacstrap ${MOUNTPOINT} "grub os-prober"
 arch_chroot "grub-install --target=i386-pc --recheck /dev/sda"
 arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 
-package_install "
+arch_chroot package_install "
     kdebase
     networkmanager
     kdeplasma-applets-plasma-nm
