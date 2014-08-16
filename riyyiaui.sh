@@ -105,32 +105,28 @@
 
 check_connection
 
-#pacman -Sy
-#pacstrap -i ${MOUNTPOINT} base base-devel
-#genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
-#nano ${MOUNTPOINT}/etc/fstab
-#arch_chroot "sed -i '/'en_US.UTF-8'/s/^#//' /etc/locale.gen"
-#arch_chroot "locale-gen"
-#echo LANG=en_US.UTF-8 > ${MOUNTPOINT}/etc/locale.conf
-#export LANG=en_US.UTF-8
-#echo "KEYMAP=dvorak" > ${MOUNTPOINT}/etc/vconsole.conf
-#arch_chroot "ln -s /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime"
-#arch_chroot "hwclock --systohc --utc"
-#echo arch-laptop > ${MOUNTPOINT}/etc/hostname
-#arch_chroot "sed -i '/127.0.0.1/s/$/ 'arch-laptop'/' /etc/hosts"
-#arch_chroot "sed -i '/::1/s/$/ 'arch-laptop'/' /etc/hosts"
-#arch_chroot "mkinitcpio -p linux"
-#echo "${BLUE}enter your new root password${RESET}"
-#arch_chroot "passwd"
-#pacstrap ${MOUNTPOINT} grub os-prober
-#arch_chroot "grub-install --target=i386-pc --recheck /dev/sda"
-#arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
+pacman -Sy
+pacstrap -i ${MOUNTPOINT} base base-devel
+genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+nano ${MOUNTPOINT}/etc/fstab
+arch_chroot "sed -i '/'en_US.UTF-8'/s/^#//' /etc/locale.gen"
+arch_chroot "locale-gen"
+echo LANG=en_US.UTF-8 > ${MOUNTPOINT}/etc/locale.conf
+export LANG=en_US.UTF-8
+echo "KEYMAP=dvorak" > ${MOUNTPOINT}/etc/vconsole.conf
+arch_chroot "ln -s /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime"
+arch_chroot "hwclock --systohc --utc"
+echo arch-laptop > ${MOUNTPOINT}/etc/hostname
+arch_chroot "sed -i '/127.0.0.1/s/$/ 'arch-laptop'/' /etc/hosts"
+arch_chroot "sed -i '/::1/s/$/ 'arch-laptop'/' /etc/hosts"
+arch_chroot "mkinitcpio -p linux"
+echo "${BLUE}enter your new root password${RESET}"
+arch_chroot "passwd"
+pacstrap ${MOUNTPOINT} grub os-prober
+arch_chroot "grub-install --target=i386-pc --recheck /dev/sda"
+arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 
-package_install_chroot "
-    kdebase
-    networkmanager
-    kdeplasma-applets-plasma-nm
-"
+pacstrap ${MOUNTPOINT} kdebase networkmanager kdeplasma-applets-plasma-nm
 
-#systemctl enable kdm.service
-#reboot
+systemctl enable kdm.service
+reboot
