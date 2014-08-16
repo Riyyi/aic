@@ -110,9 +110,9 @@ package_install "grub os-prober"
 grub-install --target=i386-pc --recheck /dev/sda
 
 package_install "
+    kdebase
     networkmanager
     kdeplasma-applets-plasma-nm
-    kdebase
 "
 
 systemctl enable kdm.service
