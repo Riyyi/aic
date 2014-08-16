@@ -41,4 +41,10 @@ arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 cp -R `pwd` ${MOUNTPOINT}/root
 echo "${BLUE}enter your new root password${RESET}"
 arch_chroot "passwd"
-reboot
+
+read -p "Reboot system?" x
+if [ x == "" || x == "y" || x == "Y" ]; then
+  reboot
+else
+  exit
+fi
