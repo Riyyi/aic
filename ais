@@ -38,6 +38,7 @@ case "$CONNECTION" in
     pacstrap ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant dialog
     break
     ;;
+esac
 
 # Generate an fstab
 genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
@@ -79,7 +80,7 @@ echo "${RED}A copy of RiyyiAUI will be placed in /root directory of your new sys
 cp -R `pwd` ${MOUNTPOINT}/root
 
 read -p "${BLUE}Reboot system?${RESET} " x
-if [ $x == "" ] || [ $x == "y" ] || [ $x == "Y" ]; then
+if [ $x != "n" ] || [ $x != "N" ]; then
   reboot
 else
   exit
