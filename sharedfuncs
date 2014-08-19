@@ -177,7 +177,6 @@
       else
         echo -e "${YELLOW}Warning: ${PKG} is up to date --skipping${RESET}"
       fi
-    fi
     done
   }
 
