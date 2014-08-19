@@ -3,7 +3,7 @@
 if [[ -f `pwd`/sharedfuncs ]]; then
   source sharedfuncs
 else
-  echo "missing file: sharedfuncs"
+  echo "Missing file: sharedfuncs"
   exit 1
 fi
 
@@ -21,7 +21,7 @@ fi
     arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
   }
 
-check_connection
+check_connection $CONNECTION
 
 # Update mirrorlist
 pacman -Sy
@@ -32,11 +32,9 @@ pacstrap ${MOUNTPOINT} base base-devel
 case "$CONNECTION" in
   wired)
     arch_chroot "systemctl enable dhcpcd@${WIRED_DEV}.service"
-    break
     ;;
   wireless)
     pacstrap ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant dialog
-    break
     ;;
 esac
 
@@ -79,9 +77,6 @@ arch_chroot "passwd"
 echo "${RED}A copy of RiyyiAUI will be placed in /root directory of your new system ${RESET}"
 cp -R `pwd` ${MOUNTPOINT}/root
 
-read -p "${BLUE}Reboot system?${RESET} " x
-if [ $x != "n" ] || [ $x != "N" ]; then
-  reboot
-else
-  exit
-fi
+read -p "${BLUE}Reboot system? [y/N]${RESET} " x
+[[ $x != "y" ]] || [[ $x != "Y" ]] || [[ -z $x ]] && reboot
+exit 0

@@ -22,6 +22,7 @@
     BCYAN=${Bold}$(tput setaf 6)
     BWHITE=${Bold}$(tput setaf 7)
   
+  ARCHI=`uname -m`
   MOUNTPOINT="/mnt"
 
   # LOG FILE
@@ -80,24 +81,35 @@
     connection_test() {
       ping -c 1 google.com &> /dev/null && return 1 || return 0
     }
-    WIRED_DEV=`ip link | grep enp | awk '{print $2}'| sed 's/://' | sed '1!d'`
-    WIRELESS_DEV=`ip link | grep wlp | awk '{print $2}'| sed 's/://' | sed '1!d'`
+    WIRED_DEV=`ip link | grep enp | awk '{print $2}' | sed 's/://' | sed '1!d'`
+    WIRELESS_DEV=`ip link | grep wlp | awk '{print $2}' | sed 's/://' | sed '1!d'`
     if connection_test; then
       echo "${RED}ERROR! Connection not found.${RESET}"
 
-      case "$1" in
-        wired)
-          systemctl start dhcpcd@${WIRED_DEV}.service
-          break
-          ;;
-        wireless)
-          ip link set ${WIRELESS_DEV} up
-          wifi-menu ${WIRELESS_DEV}
-          break
-          ;;
-      esac
-      check_connection
+#case "$1" in
+#wired)
+#systemctl start dhcpcd@${WIRED_DEV}.service
+#;;
+#wireless)
+#ip link set ${WIRELESS_DEV} up
+#wifi-menu ${WIRELESS_DEV}
+#;;
+#esac
+#check_connection
     fi
+  }
+
+  start_module() {
+    modprobe $1
+  }
+
+  add_module() { #{{{
+    #check if the number of arguments is less then 2
+    for MODULE in $1; do
+      [[ $# -lt 2 ]] && MODULE_NAME="$MODULE" || MODULE_NAME="$2"
+      echo "$MODULE" >> /etc/modules-load.d/$MODULE_NAME.conf
+      start_module "$MODULE"
+    done
   }
 
   # This option will avoid any problem with packages install
@@ -115,9 +127,33 @@
     fi
   }
 
+  add_key() {
+    pacman-key -r $1
+    pacman-key --lsign-key $1
+  }
+
+  pacman_key(){
+    if [[ ! -d /etc/pacman.d/gnupg ]]; then
+      package_install "haveged"
+      haveged -w 1024
+      pacman-key --init
+      pacman-key --populate archlinux
+      pkill haveged
+      package_remove "haveged"
+    fi
+  }
+
+  # Check if a package is already installed
+  is_package_installed() {
+    for PKG in $1; do
+      pacman -Q $PKG &> /dev/null && return 0;
+    done
+    return 1
+  }
+
   aui_download_packages() {
     for PKG in $1; do
-      #exec command as user instead of root
+      # Exec command as user instead of root
       su - ${username} -c "
         [[ ! -d aui_packages ]] && mkdir aui_packages
         cd aui_packages
@@ -130,12 +166,19 @@
     done
   }
 
-  # Check if a package is already installed
-  is_package_installed() {
+  # Install package from aur
+  aur_package_install() {
+    su - ${username} -c "sudo -v"
     for PKG in $1; do
-      pacman -Q $PKG &> /dev/null && return 0;
+      if ! is_package_installed "${PKG}" ; then
+        echo -ne "${PKG} (AUR) "
+        su - ${username} -c "${AUR_PKG_MANAGER} --noconfirm -S ${PKG}" >>"$LOG" 2>&1 &
+        PID=$!;progress $PID
+      else
+        echo -e "${YELLOW}Warning: ${PKG} is up to date --skipping${RESET}"
+      fi
+    fi
     done
-    return 1
   }
 
   # Install package using pacman
@@ -147,11 +190,33 @@
         pacman -S --noconfirm --needed ${PKG} >>"$LOG" 2>&1 &
         PID=$!;progress $PID
       else
-        echo "${PKG} ${YELLOW}(already installed)${RESET}"
+        echo -e "${YELLOW}Warning: ${PKG} is up to date --skipping${RESET}"
+      fi
+    done
+  }
+
+  # Remove package
+  package_remove() {
+    echo "${RED}Removing packages:${RESET}"
+    for PKG in ${1}; do
+      if is_package_installed "${PKG}" ; then
+        echo -ne "${PKG} "
+        pacman -Rcsn --noconfirm ${PKG} >>"$LOG" 2>&1 &
+        PID=$!;progress $PID
+      else
+        echo -e "${YELLOW}Error: target not found: ${PKG}${RESET}"
       fi
     done
   }
 
   system_update() {
     pacman -Syy
+  }
+
+  system_ctl() {
+    local ACTION=${1}
+    local OBJECT=${2}
+    echo -ne "systemctl ${ACTION} ${OBJECT} "
+    systemctl ${ACTION} ${OBJECT} >> "$LOG" 2>&1
+    PID=$!;progress $PID
   }

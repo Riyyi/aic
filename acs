@@ -10,13 +10,14 @@ fi
 # VARIABLES
   CONNECTION="wireless"         #(wired/wireless)
   USER="rick"
+  VIDEO_DRIVER="intel"          #(intel/ati/vesa)
 
 # COMMON FUNCTIONS
   configure_sudo() {
     if ! is_package_installed "sudo" ; then
       package_install "sudo"
     fi
-    #Configure sudoers {{{
+    #Configure sudoers
     if [[ ! -f /etc/sudoers.acs ]]; then
       cp -v /etc/sudoers /etc/sudoers.acs
       ## Uncomment to allow members of group wheel to execute any command
@@ -42,6 +43,7 @@ fi
     chown -R ${username}:users /home/${username}
   }
 
+  # Install Yaourt
   install_aurhelper() {
     if ! is_package_installed "yaourt" ; then
       package_install "base-devel yajl namcap"
@@ -56,15 +58,135 @@ fi
     AUR_PKG_MANAGER="yaourt"
   }
 
+  install_basic_setup() {
+    # (Un)compress tools
+    package_install "file-roller zip unzip unrar p7zip xarchiver"
+
+    # ALSA + PulseAudio
+    package_install "alsa-utils alsa-plugins"
+    [[ ${ARCHI} == x86_64 ]] && package_install "lib32-alsa-plugins"
+    package_install "pulseaudio pulseaudio-alsa"
+    [[ ${ARCHI} == x86_64 ]] && package_install "lib32-libpulse"
+    # automatically switch to newly-connected devices
+    add_line "load-module module-switch-on-connect" "/etc/pulse/default.pa"
+
+    # File Systems
+    package_install "ntfs-3g dosfstools exfat-utils fuse fuse-exfat"
+    is_package_installed "fuse" && add_module "fuse"
+  }
+
+  install_ssh() {
+    package_install "openssh"
+    system_ctl enable sshd
+  }
+
+  # Power management (tlp/powertop)
+  install_tlp() {
+    package_install "tlp"
+    system_ctl enable tlp
+    system_ctl enable tlp-sleep
+  }
+
+  install_xorg() {
+    package_install "
+    xorg-server xorg-server-utils
+    xf86-input-synaptics xf86-input-mouse xf86-input-keyboard
+    mesa
+    "
+    KEYMAP=$(localectl status | grep Keymap | awk '{print $3}')
+    localectl set-keymap ${KEYMAP}
+  }
+
+  install_video_cards() {
+    # Intel
+    if [[ ${VIDEO_DRIVER} == intel ]]; then
+      package_install "xf86-video-intel intel-dri libva-intel-driver"
+      package_install "mesa-libgl"
+      [[ ${ARCHI} == x86_64 ]] && package_install "lib32-mesa-libgl"
+    # AMD/ATI
+    elif [[ ${VIDEO_DRIVER} == ati ]]; then
+      package_install "mesa-libgl"
+      package_install "xf86-video-${VIDEO_DRIVER} ${VIDEO_DRIVER}-dri"
+      [[ ${ARCHI} == x86_64 ]] && package_install "lib32-${VIDEO_DRIVER}-dri"
+      add_module "radeon" "ati"
+    # Vesa
+    else
+      package_install "xf86-video-${VIDEO_DRIVER}"
+      package_install "mesa-libgl"
+      [[ ${ARCHI} == x86_64 ]] && package_install "lib32-mesa-libgl"
+    fi
+  }
+
+  # Installing Infinality font rendering
+  font_config() {
+    add_key "962DDE58"
+    add_repository "infinality-bundle" "http://bohoomil.com/repo/\$arch" "Never"
+    [[ $ARCHI == x86_64 ]] && add_repository "infinality-bundle-multilib" "http://bohoomil.com/repo/multilib/\$arch" "Never"
+    is_package_installed "freetype2" && pacman -Rdds --noconfirm freetype2 fontconfig cairo
+    pacman -S --needed infinality-bundle
+    [[ $ARCHI == x86_64 ]] && pacman -S --needed infinality-bundle-multilib
+    package_install "ttf-dejavu"
+  }
+
+  install_cups() {
+    package_install "cups cups-filters ghostscript gsfonts"
+    package_install "gutenprint foomatic-db foomatic-db-engine foomatic-db-nonfree foomatic-filters hplip splix cups-pdf"
+    package_install "system-config-printer"
+    system_ctl enable cups
+  }
+
+  install_additional_firmwares() {
+    # MTP [Android Devices]
+    package_install "libmtp kio-mtp android-udev"
+  }
+
+  install_desktop_environment() {
+    # Setup KDE
+    package_install "kdebase kde-gtk-config oxygen-gtk2 oxygen-gtk3 k3b"
+    is_package_installed "cups" && package_install "kdeutils-print-manager"
+    aur_package_install "flattr-icons-kde"
+    system_ctl enable kdm
+  }
+
+  # Wireless internet front-end
+  install_nm_wicd() {
+    package_install "networkmanager kdeplasma-applets-plasma-nm"
+    system_ctl enable NetworkManager
+  }
+
+  clean_orphan_packages() {
+    pacman -Rsc --noconfirm $(pacman -Qqdt)
+    pacman-optimize
+  }
+
 check_root
 check_archlinux
 check_hostname
-check_connection $CONNECTION
+check_connection# $CONNECTION
 check_pacman_blocked
 check_multilib
+pacman_key
 system_update
 configure_sudo
 create_new_user
 install_aurhelper
 
-#pacstrap ${MOUNTPOINT} kdebase networkmanager kdeplasma-applets-plasma-nm
+# Basic Setup
+install_basic_setup
+install_ssh
+install_tlp
+install_xorg
+install_video_cards
+font_config
+install_cups
+install_additional_firmwares
+
+# Desktop Environment
+install_desktop_environment
+install_nm_wicd
+
+clean_orphan_packages
+
+read -p "${BLUE}Reboot system? [y/N]${RESET} " x
+[[ $x != "y" ]] || [[ $x != "Y" ]] || [[ -z $x ]] && reboot
+exit 0
