@@ -112,6 +112,17 @@
     done
   }
 
+  add_repository() {
+    REPO=${1}
+    URL=${2}
+    [[ -n ${3} ]] && SIGLEVEL="\nSigLevel = ${3}" || SIGLEVEL=""
+    CHECK_REPO=`grep -F "${REPO}" /etc/pacman.conf`
+    if [[ -z $CHECK_REPO ]]; then
+      echo -e "\n[${REPO}]${SIGLEVEL}\nServer = ${URL}" >> /etc/pacman.conf
+      system_update
+    fi
+  }
+
   # This option will avoid any problem with packages install
   check_multilib(){
     if [[ $ARCHI == x86_64 ]]; then
@@ -141,6 +152,13 @@
       pkill haveged
       package_remove "haveged"
     fi
+  }
+
+  add_line() {
+    ADD_LINE=${1}
+    FILEPATH=${2}
+    CHECK_LINE=`grep -F "${ADD_LINE}" ${FILEPATH}`
+    [[ -z $CHECK_LINE ]] && echo "${ADD_LINE}" >> ${FILEPATH}
   }
 
   # Check if a package is already installed
