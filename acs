@@ -24,7 +24,8 @@ fi
       ## Same thing without a password (not secure)
       #sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers
 
-      echo 'Defaults !requiretty' >> /etc/sudoers
+      echo "" >> /etc/sudoers
+      echo 'Defaults visiblepw' >> /etc/sudoers
     fi
   }
 
