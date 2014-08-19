@@ -23,6 +23,8 @@ fi
       sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
       ## Same thing without a password (not secure)
       #sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers
+
+      echo 'Defaults !requiretty' >> /etc/sudoers
     fi
   }
 
@@ -46,7 +48,7 @@ fi
       aui_download_packages "package-query yaourt"
       pacman -D --asdeps package-query
       if ! is_package_installed "yaourt" ; then
-        echo "${RED}Yaourt not installed. EXIT now${RESET}"
+        echo "${RED}Yaourt not installed.${RESET}"
         exit 0
       fi
     fi

@@ -95,6 +95,7 @@
           wifi-menu ${WIRELESS_DEV}
           break
           ;;
+      esac
       check_connection
     fi
   }
