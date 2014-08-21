@@ -146,6 +146,14 @@ fi
     is_package_installed "cups" && package_install "kdeutils-print-manager"
     aur_package_install "flattr-icons-kde"
     system_ctl enable kdm
+
+    # Remove the Cashew
+    rm /usr/share/kde4/services/plasma-toolbox-desktoptoolbox.desktop
+    rm /usr/share/kde4/services/plasma-toolbox-nettoolbox.desktop
+    rm /usr/share/kde4/services/plasma-toolbox-paneltoolbox.desktop
+
+    # Homerun launcher
+    aur_package_install "kdeplasma-applets-homerun"
   }
 
   # Wireless internet front-end
