@@ -186,7 +186,7 @@
 
   # Install package from aur
   aur_package_install() {
-    su - ${username} -c "sudo -v"
+    #su - ${username} -c "sudo -v"
     for PKG in $1; do
       if ! is_package_installed "${PKG}" ; then
         echo -ne "${PKG} (AUR) "

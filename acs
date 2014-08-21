@@ -26,7 +26,8 @@ fi
       #sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers
 
       echo "" >> /etc/sudoers
-      echo 'Defaults visiblepw' >> /etc/sudoers
+      echo 'Defaults visiblepw, insults' >> /etc/sudoers
+      echo 'Defaults passwd_timeout=5' >> /etc/sudoers
     fi
   }
 
@@ -125,7 +126,7 @@ fi
     is_package_installed "freetype2" && pacman -Rdds --noconfirm freetype2 fontconfig cairo
     package_install "infinality-bundle"
     [[ $ARCHI == x86_64 ]] && package_install "infinality-bundle-multilib"
-    package_install "ttf-dejavu"
+    package_install "ttf-bitstream-vera ttf-dejavu"
   }
 
   install_cups() {

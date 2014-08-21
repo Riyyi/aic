@@ -27,7 +27,7 @@ check_connection $CONNECTION
 pacman -Sy
 
 # Install the base system
-pacstrap ${MOUNTPOINT} base base-devel
+pacstrap ${MOUNTPOINT} base base-devel linux-headers
 
 case "$CONNECTION" in
   wired)
@@ -74,7 +74,7 @@ arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
 echo "${BLUE}Enter your new root password${RESET}"
 arch_chroot "passwd"
 
-echo "${RED}A copy of RiyyiAUI will be placed in /root directory of your new system ${RESET}"
+echo "${RED}A copy of RiyyiAIC will be placed in /root directory of your new system ${RESET}"
 cp -R `pwd` ${MOUNTPOINT}/root
 
 read -p "${BLUE}Reboot system? [y/N]${RESET} " x
