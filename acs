@@ -123,8 +123,8 @@ fi
     add_repository "infinality-bundle" "http://bohoomil.com/repo/\$arch" "Never"
     [[ $ARCHI == x86_64 ]] && add_repository "infinality-bundle-multilib" "http://bohoomil.com/repo/multilib/\$arch" "Never"
     is_package_installed "freetype2" && pacman -Rdds --noconfirm freetype2 fontconfig cairo
-    pacman -S --needed infinality-bundle
-    [[ $ARCHI == x86_64 ]] && pacman -S --needed infinality-bundle-multilib
+    package_install "infinality-bundle"
+    [[ $ARCHI == x86_64 ]] && package_install "infinality-bundle-multilib"
     package_install "ttf-dejavu"
   }
 
@@ -142,7 +142,7 @@ fi
 
   install_desktop_environment() {
     # Setup KDE
-    package_install "kdebase kde-gtk-config oxygen-gtk2 oxygen-gtk3 k3b"
+    package_install "kdebase kde-gtk-config oxygen-gtk2 oxygen-gtk3 k3b kdesu"
     is_package_installed "cups" && package_install "kdeutils-print-manager"
     aur_package_install "flattr-icons-kde"
     system_ctl enable kdm

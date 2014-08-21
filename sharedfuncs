@@ -200,7 +200,6 @@
 
   # Install package using pacman
   package_install() {
-    echo "${BLUE}Installing packages:${RESET}"
     for PKG in ${1}; do
       if ! is_package_installed "${PKG}" ; then
         echo -ne "${PKG} "
@@ -214,7 +213,6 @@
 
   # Remove package
   package_remove() {
-    echo "${RED}Removing packages:${RESET}"
     for PKG in ${1}; do
       if is_package_installed "${PKG}" ; then
         echo -ne "${PKG} "
