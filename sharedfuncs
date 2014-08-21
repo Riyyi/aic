@@ -186,11 +186,10 @@
 
   # Install package from aur
   aur_package_install() {
-    #su - ${username} -c "sudo -v"
     for PKG in $1; do
       if ! is_package_installed "${PKG}" ; then
         echo -ne "${PKG} (AUR) "
-        su - ${username} -c "${AUR_PKG_MANAGER} --noconfirm -S ${PKG}" >>"$LOG" 2>&1 &
+        ${AUR_PKG_MANAGER} --noconfirm -S ${PKG} >>"$LOG" 2>&1 &
         PID=$!;progress $PID
       else
         echo -e "${YELLOW}Warning: ${PKG} is up to date --skipping${RESET}"
