@@ -11,6 +11,7 @@ fi
   CONNECTION="wireless"         #(wired/wireless)
   USER="rick"
   VIDEO_DRIVER="intel"          #(intel/ati/vesa)
+  DEVICETYPE="laptop"           #(desktop/laptop/nuc)
 
 # COMMON FUNCTIONS
   configure_sudo() {
@@ -40,7 +41,6 @@ fi
 
     # Configure user
     cp /etc/skel/.bashrc /home/${username}
-    package_install "nano"
     chown -R ${username}:users /home/${username}
   }
 
@@ -66,7 +66,7 @@ fi
     # ALSA + PulseAudio
     package_install "alsa-utils alsa-plugins"
     [[ ${ARCHI} == x86_64 ]] && package_install "lib32-alsa-plugins"
-    package_install "pulseaudio pulseaudio-alsa"
+    package_install "pulseaudio pulseaudio-alsa kdemultimedia-kmix"
     [[ ${ARCHI} == x86_64 ]] && package_install "lib32-libpulse"
     # automatically switch to newly-connected devices
     add_line "load-module module-switch-on-connect" "/etc/pulse/default.pa"
@@ -164,8 +164,30 @@ fi
   }
 
   clean_orphan_packages() {
-    pacman -Rsc --noconfirm $(pacman -Qqdt)
+    echo -ne "deleting unneeded packages"
+    pacman -Rsc --noconfirm $(pacman -Qqdt) >>"$LOG" 2>&1 &
+    PID=$!;progress $PID
     pacman-optimize
+  }
+
+  # Install extra applications dependent on device type
+  install_devicetype_extras() {
+    if [[ $DEVICETYPE == "desktop" ]]; then
+      package_install "steam mpv livestreamer youtube-dl thunderbird qtcreator cmake flashplugin"
+      aur_package_install "qbittorrent firefox-kde-opensuse"
+
+    elif [[ $DEVICETYPE == "laptop" ]]; then
+      package_install "steam mpv livestreamer youtube-dl thunderbird qtcreator cmake flashplugin"
+      aur_package_install "qbittorrent firefox-kde-opensuse"
+
+    elif [[ $DEVICETYPE == "nuc" ]]; then
+    fi
+
+    # Steam remove default shipped OpenGL libraries
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/libstdc++.so.6
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu/libgcc_s.so.1
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/lib/x86_64-linux-gnu/libgcc_s.so.1
   }
 
 check_root
@@ -193,6 +215,7 @@ install_additional_firmwares
 # Desktop Environment
 install_desktop_environment
 install_nm_wicd
+install_devicetype_extras
 
 clean_orphan_packages
 
