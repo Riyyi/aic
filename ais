@@ -78,5 +78,5 @@ echo "${RED}A copy of RiyyiAIC will be placed in /root directory of your new sys
 cp -R `pwd` ${MOUNTPOINT}/root
 
 read -p "${BLUE}Reboot system? [y/N]${RESET} " x
-[[ $x != "y" ]] || [[ $x != "Y" ]] || [[ -z $x ]] && reboot
+[[ $x == "y" ]] || [[ $x == "Y" ]] || [[ -z $x ]] && reboot
 exit 0

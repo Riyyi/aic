@@ -19,16 +19,16 @@ fi
       package_install "sudo"
     fi
     #Configure sudoers
-    if [[ ! -f /etc/sudoers.acs ]]; then
-      cp -v /etc/sudoers /etc/sudoers.acs
+    if [[ ! -f /etc/sudoers.aic ]]; then
+      cp -v /etc/sudoers /etc/sudoers.aic
       ## Uncomment to allow members of group wheel to execute any command
-      sed -i '/%wheel ALL=(ALL) ALL/s/^#//' /etc/sudoers
+      sed -i '/%wheel ALL=(ALL) ALL/s/^# //' /etc/sudoers
       ## Same thing without a password (not secure)
-      #sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^#//' /etc/sudoers
+      #sed -i '/%wheel ALL=(ALL) NOPASSWD: ALL/s/^# //' /etc/sudoers
 
       echo "" >> /etc/sudoers
       echo 'Defaults visiblepw, insults' >> /etc/sudoers
-      echo 'Defaults passwd_timeout=5' >> /etc/sudoers
+      echo 'Defaults timestamp_timeout=15' >> /etc/sudoers
     fi
   }
 
@@ -163,62 +163,78 @@ fi
     system_ctl enable NetworkManager
   }
 
+  # Install extra applications used in a normal desktop environment
+  install_x_extras() {
+    package_install "steam mpv livestreamer youtube-dl thunderbird qtcreator cmake flashplugin gparted screenfetch scrot"
+    aur_package_install "qbittorrent firefox-kde-opensuse"
+
+    # Remove Steam outdated default shipped OpenGL libraries
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/libstdc++.so.6
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu/libgcc_s.so.1
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/lib/x86_64-linux-gnu/libgcc_s.so.1
+
+    # Install GRUB theme
+    package_install "grub2-theme-archxion-widescreen"
+    sed -i '/GRUB_THEME=/s/^#//' /etc/default/grub
+    sed -i '/"\/path\/to\/gfxtheme"/s/\/path\/to\/gfxtheme/\/boot\/grub\/themes\/Archxion-widescreen\/theme.txt' /etc/default/grub
+    sed -i '/GRUB_GFXMODE=/s/auto/1920x1080/' /etc/default/grub
+    grub-mkconfig -o /boot/grub/grub.cfg
+  }
+
+  install_desktop_extras() {}
+  install_laptop_extras() {}
+  install_nuc_extras() {}
+
   clean_orphan_packages() {
-    echo -ne "deleting unneeded packages"
+    echo -ne "${BLUE}Deleting unneeded packages${RESET}"
     pacman -Rsc --noconfirm $(pacman -Qqdt) >>"$LOG" 2>&1 &
     PID=$!;progress $PID
     pacman-optimize
   }
 
-  # Install extra applications dependent on device type
-  install_devicetype_extras() {
-    if [[ $DEVICETYPE == "desktop" ]]; then
-      package_install "steam mpv livestreamer youtube-dl thunderbird qtcreator cmake flashplugin"
-      aur_package_install "qbittorrent firefox-kde-opensuse"
+# BEFOREHAND CHECKS
+  check_root
+  check_archlinux
+  check_hostname
+  check_connection# $CONNECTION
+  check_pacman_blocked
+  check_multilib
+  pacman_key
+  system_update
+  configure_sudo
+  create_new_user
+  install_aurhelper
 
-    elif [[ $DEVICETYPE == "laptop" ]]; then
-      package_install "steam mpv livestreamer youtube-dl thunderbird qtcreator cmake flashplugin"
-      aur_package_install "qbittorrent firefox-kde-opensuse"
+# CONFIGURATION
+  if [[ $DEVICETYPE == "desktop" ]] || [[ $DEVICETYPE == "laptop" ]]; then
+    # Basic Setup
+    install_basic_setup
+    install_ssh
+    install_tlp
+    install_xorg
+    install_video_cards
+    font_config
+    install_cups
+    install_additional_firmwares
 
-    elif [[ $DEVICETYPE == "nuc" ]]; then
-    fi
+    # Desktop Environment
+    install_desktop_environment
+    install_nm_wicd
 
-    # Steam remove default shipped OpenGL libraries
-    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/libstdc++.so.6
-    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/i386/lib/i386-linux-gnu/libgcc_s.so.1
-    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/usr/lib/x86_64-linux-gnu/libstdc++.so.6
-    rm /home/${username}/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/lib/x86_64-linux-gnu/libgcc_s.so.1
-  }
+    install_x_extras
+    [[ $DEVICETYPE == "desktop" ]] && install_desktop_extras
+    [[ $DEVICETYPE == "laptop" ]] && install_laptop_extras
 
-check_root
-check_archlinux
-check_hostname
-check_connection# $CONNECTION
-check_pacman_blocked
-check_multilib
-pacman_key
-system_update
-configure_sudo
-create_new_user
-install_aurhelper
-
-# Basic Setup
-install_basic_setup
-install_ssh
-install_tlp
-install_xorg
-install_video_cards
-font_config
-install_cups
-install_additional_firmwares
-
-# Desktop Environment
-install_desktop_environment
-install_nm_wicd
-install_devicetype_extras
+  elif [[ $DEVICETYPE == "nuc" ]]; then
+    # Basic Setup
+    install_ssh
+    install_tlp
+    install_nuc_extras
+  fi
 
 clean_orphan_packages
 
 read -p "${BLUE}Reboot system? [y/N]${RESET} " x
-[[ $x != "y" ]] || [[ $x != "Y" ]] || [[ -z $x ]] && reboot
+[[ $x == "y" ]] || [[ $x == "Y" ]] || [[ -z $x ]] && reboot
 exit 0
