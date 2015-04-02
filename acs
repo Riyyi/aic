@@ -143,10 +143,10 @@ fi
 
   install_desktop_environment() {
     # Setup KDE
-    package_install "kdebase kde-gtk-config oxygen-gtk2 oxygen-gtk3 k3b kdesu"
+    package_install "kf5 kf5-aids plasma sddm kde-gtk-config oxygen-gtk2 oxygen-gtk3 libappindicator-gtk2 libappindicator-gtk3 sni-qt lib32-sni-qt k3b kdesu"
     is_package_installed "cups" && package_install "kdeutils-print-manager"
     aur_package_install "flattr-icons-kde"
-    system_ctl enable kdm
+    system_ctl enable sddm
 
     # Remove the Cashew
     rm /usr/share/kde4/services/plasma-toolbox-desktoptoolbox.desktop
