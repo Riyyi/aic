@@ -182,9 +182,9 @@ fi
     grub-mkconfig -o /boot/grub/grub.cfg
   }
 
-  install_desktop_extras() {}
-  install_laptop_extras() {}
-  install_nuc_extras() {}
+#  install_desktop_extras() {}
+#  install_laptop_extras() {}
+#  install_nuc_extras() {}
 
   clean_orphan_packages() {
     echo -ne "${BLUE}Deleting unneeded packages${RESET}"
