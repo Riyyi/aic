@@ -1,82 +1,115 @@
 #!/bin/bash
 
 if [[ -f `pwd`/sharedfuncs ]]; then
-  source sharedfuncs
+  . sharedfuncs
 else
   echo "Missing file: sharedfuncs"
   exit 1
 fi
 
-# VARIABLES
-  CONNECTION="wireless"         #(wired/wireless)
-  LOCALE="en_US"
-  KEYMAP="dvorak"               #(us)
-  TIMEZONE="Europe/Amsterdam"
-  HARDWARECLOCK="utc"           #(utc/localtime)
-  HOSTNAME="arch-laptop"
-  INSTALLPARTITION="sda"        #(sda/sdb/sdc)
+if [ -d _ais ]; then
+    for files in _ais/*; do
+        . $files
+    done
+else
+  echo "Missing directory: _ais"
+  exit 1
+fi
 
-# COMMON FUNCTIONS
-  arch_chroot() {
-    arch-chroot $MOUNTPOINT /bin/bash -c "${1}"
-  }
 
-check_connection $CONNECTION
-
+print_title "https://wiki.archlinux.org/index.php/Arch_Install_Scripts"
+print_info "The Arch Install Scripts are a set of Bash scripts that simplify Arch installation."
+pause_function
+check_boot_system
+check_connection
+check_trim
 # Update mirrorlist
 pacman -Sy
 
-# Install the base system
-pacstrap ${MOUNTPOINT} base base-devel linux-headers
-
-case "$CONNECTION" in
-  wired)
-    arch_chroot "systemctl enable dhcpcd@${WIRED_DEV}.service"
-    ;;
-  wireless)
-    pacstrap ${MOUNTPOINT} iw wireless_tools wpa_actiond wpa_supplicant dialog
-    ;;
-esac
-
-# Generate an fstab
-genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
-nano ${MOUNTPOINT}/etc/fstab
-
-# Locale
-arch_chroot "sed -i '/'${LOCALE}.UTF-8'/s/^#//' /etc/locale.gen"
-arch_chroot "locale-gen"
-echo LANG=${LOCALE}.UTF-8 > ${MOUNTPOINT}/etc/locale.conf
-export LANG=${LOCALE}.UTF-8
-
-# Console keymap
-echo "KEYMAP=${KEYMAP}" > ${MOUNTPOINT}/etc/vconsole.conf
-
-# Time zone
-arch_chroot "ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime"
-
-# Hardware clock
-arch_chroot "hwclock --systohc --${HARDWARECLOCK}"
-
-# Hostname
-echo ${HOSTNAME} > ${MOUNTPOINT}/etc/hostname
-arch_chroot "sed -i '/127.0.0.1/s/$/ '${HOSTNAME}'/' /etc/hosts"
-arch_chroot "sed -i '/::1/s/$/ '${HOSTNAME}'/' /etc/hosts"
-
-# Create an initial ramdisk environment
-arch_chroot "mkinitcpio -p linux"
-
-# Install and configure a bootloader
-pacstrap ${MOUNTPOINT} grub os-prober
-arch_chroot "grub-install --target=i386-pc --recheck /dev/${INSTALLPARTITION}"
-arch_chroot "grub-mkconfig -o /boot/grub/grub.cfg"
-
-# Set the root password
-echo "${BLUE}Enter your new root password${RESET}"
-arch_chroot "passwd"
-
-echo "${RED}A copy of RiyyiAIC will be placed in /root directory of your new system ${RESET}"
-cp -R `pwd` ${MOUNTPOINT}/root
-
-read -p "${BLUE}Reboot system? [y/N]${RESET} " x
-[[ $x == "y" ]] || [[ $x == "Y" ]] || [[ -z $x ]] && reboot
-exit 0
+while true
+do
+  print_title "ARCHLINUX INSTALL && CONFIGURE - https://github.com/riyyi/aic"
+  echo " 1) $(mainmenu_item "${checklist[1]}" "Select Keymap")"
+  echo " 2) $(mainmenu_item "${checklist[2]}" "Select Editor")"
+  echo " 3) $(mainmenu_item "${checklist[3]}" "Configure Mirrorlist")"
+  echo " 4) $(mainmenu_item "${checklist[4]}" "Partition Scheme")"
+  echo " 5) $(mainmenu_item "${checklist[5]}" "Install Base System")"
+  echo " 6) $(mainmenu_item "${checklist[6]}" "Configure Fstab")"
+  echo " 7) $(mainmenu_item "${checklist[7]}" "Configure Locale")"
+  echo " 8) $(mainmenu_item "${checklist[8]}" "Configure Timezone")"
+  echo " 9) $(mainmenu_item "${checklist[9]}" "Configure Hardware Clock")"
+  echo "10) $(mainmenu_item "${checklist[10]}" "Configure Hostname")"
+  echo "11) $(mainmenu_item "${checklist[11]}" "Configure Mkinitcpio")"
+  echo "12) $(mainmenu_item "${checklist[12]}" "Install Bootloader")"
+  echo "13) $(mainmenu_item "${checklist[13]}" "Root Password")"
+  echo ""
+  echo " d) Done"
+  echo ""
+  read_input_options
+  for OPT in ${OPTIONS[@]}; do
+    case "$OPT" in
+      1)
+        select_keymap
+        checklist[1]=1
+        ;;
+      2)
+        select_editor #! automatic mode
+        checklist[2]=1
+        ;;
+      3)
+        configure_mirrorlist
+        checklist[3]=1
+        ;;
+      4)
+        umount_partitions
+        create_partition_scheme
+        format_partitions
+        checklist[4]=1
+        ;;
+      5)
+        install_base_system
+        configure_keymap
+        checklist[5]=1
+        ;;
+      6)
+        configure_fstab
+        checklist[6]=1
+        ;;
+      7)
+        configure_locale
+        checklist[7]=1
+        ;;
+      8)
+        configure_timezone
+        checklist[8]=1
+        ;;
+      9)
+        configure_hardwareclock
+        checklist[9]=1
+        ;;
+      10)
+        configure_hostname
+        checklist[10]=1
+        ;;
+      11)
+        configure_mkinitcpio
+        checklist[11]=1
+        ;;
+      12)
+        install_bootloader
+        configure_bootloader
+        checklist[12]=1
+        ;;
+      13)
+        root_password
+        checklist[13]=1
+        ;;
+      "d")
+        finish
+        ;;
+      *)
+        invalid_option
+        ;;
+    esac
+  done
+done

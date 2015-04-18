@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#CONFIGURE LOCALE {{{
+configure_locale(){
+    print_title "LOCALE - https://wiki.archlinux.org/index.php/Locale"
+    print_info "Locales are used in Linux to define which language the user uses. As the locales define the character sets being used as well, setting up the correct locale is especially important if the language contains non-ASCII characters."
+    OPTION=n
+  
+    while [[ $OPTION != y ]]; do
+        setlocale
+        read_input_text "Confirm locale ($LOCALE)"
+    done
+  
+    echo 'LANG="'$LOCALE_UTF8'"' > ${MOUNTPOINT}/etc/locale.conf
+    arch_chroot "sed -i '/'${LOCALE_UTF8}'/s/^#//' /etc/locale.gen"
+    arch_chroot "locale-gen"
+}
+#}}}

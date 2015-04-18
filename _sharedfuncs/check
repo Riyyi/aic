@@ -1,0 +1,196 @@
+#!/bin/bash 
+
+check_boot_system() { #{{{
+    if [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Inc.' ]] || [[ "$(cat /sys/class/dmi/id/sys_vendor)" == 'Apple Computer, Inc.' ]]; then
+        modprobe -r -q efivars || true  # if MAC
+    else
+        modprobe -q efivarfs            # all others
+    fi
+    
+    if [[ -d "/sys/firmware/efi/" ]]; then
+        ## Mount efivarfs if it is not already mounted
+        if [[ -z $(mount | grep /sys/firmware/efi/efivars) ]]; then
+            mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+        fi
+        
+        UEFI=1
+        echo "UEFI Mode detected"
+    else
+        UEFI=0
+        echo "BIOS Mode detected"
+    fi
+} #}}}
+
+check_trim() { #{{{
+    [[ -n $(hdparm -I /dev/sda | grep TRIM &> /dev/null) ]] && TRIM=1
+} #}}}
+
+check_root() { #{{{
+    if [[ "$(id -u)" != "0" ]]; then
+        error_msg "ERROR! You must execute the script as the 'root' user."
+    fi
+} #}}}
+  
+check_user() { #{{{
+    if [[ "$(id -u)" == "0" ]]; then
+        error_msg "ERROR! You must execute the script as a normal user."
+    fi
+} #}}}
+  
+check_archlinux() { #{{{
+    if [[ ! -e /etc/arch-release ]]; then
+        error_msg "ERROR! You must execute the script on Arch Linux."
+    fi
+} #}}}
+  
+check_hostname() { #{{{
+    if [[ `echo ${HOSTNAME} | sed 's/ //g'` == "" ]]; then
+        error_msg "ERROR! Hostname is not configured."
+    fi
+} #}}}
+  
+check_pacman_blocked() { #{{{
+    if [[ -f /var/lib/pacman/db.lck ]]; then
+        error_msg "ERROR! Pacman is blocked. \nIf not running remove /var/lib/pacman/db.lck."
+    fi
+} #}}}
+  
+check_domainname() { #{{{
+    local _domainname=`echo ${HOSTNAME} | cut -d'.' -f2- | sed 's/ //g'`
+
+    # no domain name. Keep looking...
+    if [[ "${_domainname}" == "" ]]; then
+        _domainname=`grep domain /etc/resolv.conf | sed 's/domain //g' | sed 's/ //g'`
+    fi
+
+    # not founded...
+    if [[ "${_domainname}" == "" ]]; then
+        error_msg "ERROR! Domain name is not configured."
+    fi
+} #}}}
+  
+check_connection(){ #{{{
+    XPINGS=$(( $XPINGS + 1 ))
+    
+    connection_test() {
+        ping -q -w 1 -c 1 `ip r | grep default | awk 'NR==1 {print $3}'` &> /dev/null && return 1 || return 0
+    }
+    
+    WIRED_DEV=`ip link | grep "eno\|enp" | awk '{print $2}'| sed 's/://' | sed '1!d'`
+    WIRELESS_DEV=`ip link | grep wlp | awk '{print $2}'| sed 's/://' | sed '1!d'`
+    if connection_test; then
+        print_warning "ERROR! Connection not Found."
+        print_info "Network Setup"
+        local _connection_opts=("Wired Automatic" "Wired Manual" "Wireless" "Configure Proxy" "Skip")
+        PS3="$prompt1"
+      
+        select CONNECTION_TYPE in "${_connection_opts[@]}"; do
+            case "$REPLY" in
+                1)
+                systemctl start dhcpcd@${WIRED_DEV}.service
+                break
+                ;;
+                
+                2)
+                systemctl stop dhcpcd@${WIRED_DEV}.service
+                read -p "IP Address: " IP_ADDR
+                read -p "Submask: " SUBMASK
+                read -p "Gateway: " GATEWAY
+                ip link set ${WIRED_DEV} up
+                ip addr add ${IP_ADDR}/${SUBMASK} dev ${WIRED_DEV}
+                ip route add default via ${GATEWAY}
+                $EDITOR /etc/resolv.conf
+                break
+                ;;
+            
+                3)
+                ip link set ${WIRELESS_DEV} up
+                wifi-menu ${WIRELESS_DEV}
+                break
+                ;;
+                
+                4)
+                read -p "Enter your proxy e.g. protocol://adress:port: " OPTION
+                export http_proxy=$OPTION
+                export https_proxy=$OPTION
+                export ftp_proxy=$OPTION
+                echo "proxy = $OPTION" > ~/.curlrc
+                break
+                ;;
+            
+                5)
+                break
+                ;;
+            
+                *)
+                invalid_option
+                ;;
+            esac
+        done
+        
+        if [[ $XPINGS -gt 2 ]]; then
+            print_warning "Can't establish connection. exiting..."
+            exit 1
+        fi
+      
+        [[ $REPLY -ne 5 ]] && check_connection
+    fi
+} #}}}
+  
+check_vga() { #{{{
+    # Determine video chipset - only Intel, ATI and nvidia are supported by this script
+    ncecho " ${BBlue}[${Reset}${Bold}X${BBlue}]${Reset} Detecting video chipset "
+    local _vga=`lspci | grep VGA | tr "[:upper:]" "[:lower:]"`
+    local _vga_length=`lspci | grep VGA | wc -l`
+
+    if [[ -n $(dmidecode --type 1 | grep VirtualBox) ]]; then
+        cecho Virtualbox
+        VIDEO_DRIVER="virtualbox"
+    elif [[ $_vga_length -eq 2 ]] && [[ -n $(echo ${_vga} | grep "nvidia") || -f /sys/kernel/debug/dri/0/vbios.rom ]]; then
+        cecho Bumblebee
+        VIDEO_DRIVER="bumblebee"
+    elif [[ -n $(echo ${_vga} | grep "nvidia") || -f /sys/kernel/debug/dri/0/vbios.rom ]]; then
+        cecho Nvidia
+        read_input_text "Install NVIDIA proprietary driver" $PROPRIETARY_DRIVER
+        
+        if [[ $OPTION == y ]]; then
+            VIDEO_DRIVER="nvidia"
+        else
+            VIDEO_DRIVER="nouveau"
+        fi
+    elif [[ -n $(echo ${_vga} | grep "advanced micro devices") || -f /sys/kernel/debug/dri/0/radeon_pm_info || -f /sys/kernel/debug/dri/0/radeon_sa_info ]]; then
+        cecho AMD/ATI
+        VIDEO_DRIVER="ati"
+    elif [[ -n $(echo ${_vga} | grep "intel corporation") || -f /sys/kernel/debug/dri/0/i915_capabilities ]]; then
+        cecho Intel
+        VIDEO_DRIVER="intel"
+    else
+        cecho VESA
+        VIDEO_DRIVER="vesa"
+    fi
+    
+    OPTION="y"
+    [[ $VIDEO_DRIVER == intel || $VIDEO_DRIVER == vesa ]] && read -p "Confirm video driver: $VIDEO_DRIVER [Y/n]" OPTION
+    if [[ $OPTION == n ]]; then
+        read -p "Type your video driver [ex: sis, fbdev, modesetting]: " VIDEO_DRIVER
+    fi
+} #}}}
+
+contains_element() { #{{{
+    #check if an element exist in a string
+    for e in "${@:2}"; do [[ $e == $1 ]] && break; done;
+} #}}}
+
+getkeymap() { #{{{
+    local _keymaps=(`localectl list-keymaps`)
+    PS3="(shift+pgup/pgdown) $prompt1"
+    echo "Select keymap:"
+    select KEYMAP in "${_keymaps[@]}"; do
+        if contains_element "$KEYMAP" "${_keymaps[@]}"; then
+            break
+        else
+            invalid_option
+        fi
+    done
+  }
+#}}}

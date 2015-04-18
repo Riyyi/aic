@@ -1,0 +1,5 @@
+#!/bin/bash
+
+install_base_system() { #{{{
+    pacstrap -i ${MOUNTPOINT} base base-devel linux-headers
+} #}}}

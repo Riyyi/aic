@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#GLOBAL VARIABLES {{{
+    checklist=( 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 )
+
+    # COLORS {{{
+        Bold=$(tput bold)
+        Underline=$(tput sgr 0 1)
+        Reset=$(tput sgr0)
+        # Regular Colors
+        Red=$(tput setaf 1)
+        Green=$(tput setaf 2)
+        Yellow=$(tput setaf 3)
+        Blue=$(tput setaf 4)
+        Purple=$(tput setaf 5)
+        Cyan=$(tput setaf 6)
+        White=$(tput setaf 7)
+        # Bold
+        BRed=${Bold}$(tput setaf 1)
+        BGreen=${Bold}$(tput setaf 2)
+        BYellow=${Bold}$(tput setaf 3)
+        BBlue=${Bold}$(tput setaf 4)
+        BPurple=${Bold}$(tput setaf 5)
+        BCyan=${Bold}$(tput setaf 6)
+        BWhite=${Bold}$(tput setaf 7)
+    #}}}
+    
+    # PROMPT {{{
+        prompt1="Enter your option: "
+        prompt2="Enter nr. of options (ex: 1 2 3 or 1-3): "
+        prompt3="You have to manually enter the following commands, then press ${BYellow}ctrl+d${Reset} or type ${BYellow}exit${Reset}:"
+    #}}}
+    
+    # MOUNTPOINTS {{{
+        EFI_MOUNTPOINT="/boot/efi"
+        ROOT_MOUNTPOINT="/dev/sda1"
+        BOOT_MOUNTPOINT="/dev/sda"
+        MOUNTPOINT="/mnt"
+    #}}}
+    
+    AUTOMATIC_MODE=0
+    TRIM=0
+#}}}

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#INSTALL BOOTLOADER {{{
+install_bootloader(){
+    print_title "BOOTLOADER - https://wiki.archlinux.org/index.php/Bootloader"
+    print_info "The boot loader is responsible for loading the kernel and initial RAM disk before initiating the boot process."
+    print_warning "\tROOT Partition: ${ROOT_MOUNTPOINT}"
+    print_warning "\tWARNING: There is no support for GRUB + LUKS/LVM."
+  
+    if [[ $UEFI -eq 1 ]]; then
+        print_warning "\tUEFI Mode Detected"
+        bootloaders_list=("Grub2" "Syslinux" "Gummiboot" "Skip")
+    else
+        print_warning "\tBIOS Mode Detected"
+        bootloaders_list=("Grub2" "Syslinux" "Skip")
+    fi
+  
+    PS3="$prompt1"
+    echo -e "Install bootloader:\n"
+    select bootloader in "${bootloaders_list[@]}"; do
+        case "$REPLY" in
+            1)
+                pacstrap ${MOUNTPOINT} grub os-prober
+                break
+                ;;
+            2)
+                pacstrap ${MOUNTPOINT} syslinux gptfdisk
+                break
+                ;;
+            3)
+                [[ $UEFI -eq 1 ]] && pacstrap ${MOUNTPOINT} gummiboot
+                break
+                ;;
+            4)
+                [[ $UEFI -eq 1 ]] && break || invalid_option
+                ;;
+            *)
+                invalid_option
+                ;;
+        esac
+    done
+    [[ $UEFI -eq 1 ]] && pacstrap ${MOUNTPOINT} efibootmgr dosfstools
+}
+#}}}

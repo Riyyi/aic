@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#CONFIGURE FSTAB {{{
+configure_fstab(){
+    print_title "FSTAB - https://wiki.archlinux.org/index.php/Fstab"
+    print_info "The /etc/fstab file contains static filesystem information. It defines how storage devices and partitions are to be mounted and integrated into the overall system. It is read by the mount command to determine which options to use when mounting a specific partition or partition."
+    
+    if [[ ! -f ${MOUNTPOINT}/etc/fstab.aui ]]; then
+        cp ${MOUNTPOINT}/etc/fstab ${MOUNTPOINT}/etc/fstab.aui
+    else
+        cp ${MOUNTPOINT}/etc/fstab.aui ${MOUNTPOINT}/etc/fstab
+    fi
+    
+    if [[ $UEFI -eq 1 ]]; then
+        fstab_list=("DEV" "PARTUUID" "LABEL");
+    else
+        fstab_list=("DEV" "UUID" "LABEL");
+    fi
+
+    PS3="$prompt1"
+    echo -e "Configure fstab based on:"
+    select OPT in "${fstab_list[@]}"; do
+        case "$REPLY" in
+            1) genfstab -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
+            2)  if [[ $UEFI -eq 1 ]]; then
+                   genfstab -t PARTUUID -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+                else
+                    genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+                fi
+                ;;
+            3) genfstab -L -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
+            *) invalid_option ;;
+        esac
+        [[ -n $OPT ]] && break
+    done
+  
+    echo "Review your fstab"
+    [[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
+    pause_function
+    $EDITOR ${MOUNTPOINT}/etc/fstab
+}
+#}}}

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#SELECT KEYMAP {{{
+select_keymap(){
+    print_title "KEYMAP - https://wiki.archlinux.org/index.php/KEYMAP"
+    print_info "The KEYMAP variable is specified in the /etc/rc.conf file. It defines what keymap the keyboard is in the virtual consoles. Keytable files are provided by the kbd package."
+
+    # @AUTOMATIC_MODE
+    if [[ $AUTOMATIC_MODE -eq 1 ]]; then
+        OPTION=y
+        echo "Selected keymap: $KEYMAP"
+        sleep 1
+    else
+        OPTION=n
+    fi
+    
+    while [[ $OPTION != y ]]; do
+        getkeymap
+        read_input_text "Confirm keymap: $KEYMAP"
+    done
+    
+    loadkeys $KEYMAP
+}
+#}}}
+

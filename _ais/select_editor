@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#DEFAULT EDITOR {{{
+select_editor(){
+    print_title "DEFAULT EDITOR"
+    
+    #if [[ $AUTOMATIC_MODE -eq 1 ]]; then
+    #    echo "Selected Editor: $EDITOR"
+    #    package_install "$EDITOR"
+    #else
+    #fi
+    
+    editors_list=("emacs" "nano" "vi" "vim" "zile");
+    PS3="$prompt1"
+    echo -e "Select editor\n"
+    select EDITOR in "${editors_list[@]}"; do
+        if contains_element "$EDITOR" "${editors_list[@]}"; then
+            package_install "$EDITOR"
+            break
+        else
+            invalid_option
+        fi
+    done
+}
+#}}}

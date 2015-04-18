@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#MAINMENU {{{
+    # 1) Select Keymap
+    # 2) Select Editor
+    # 3) Configure Mirrorlist
+    # 4) Partition Scheme
+    # 5) Install Base System
+    # 6) Configure Fstab
+    # 7) Configure Locale
+    # 8) Configure Timezone
+    # 9) Configure Hardware Clock
+    #10) Configure Hostname
+    #11) Configure Mkinitcpio
+    #12) Install Bootloader
+    #13) Root Password
+    MAINMENU="1-13"
+#}}}
+
+#SELECT KEYMAP {{{
+    KEYMAP="dvorak"
+#}}}
+
+#SELECT EDITOR {{{
+    # emacs
+    # nano
+    # vi
+    # vim
+    # zile
+    EDITOR="nano"
+#}}}
+
+#CONFIGURE MIRRORLIST {{{
+    # "AU" "AT" "BY" "BE" "BR"
+    # "BG" "CA" "CL" "CN" "CO"
+    # "CZ" "DK" "EE" "FI" "FR"
+    # "DE" "GR" "HU" "IN" "IE"
+    # "IL" "IT" "JP" "KZ" "KR"
+    # "LV" "LU" "MK" "NL" "NC"
+    # "NZ" "NO" "PL" "PT" "RO"
+    # "RU" "RS" "SG" "SK" "ZA"
+    # "ES" "LK" "SE" "CH" "TW"
+    # "TR" "UA" "GB" "US" "UZ"
+    # "VN"
+    contry_code="NL"                    # Select closest country to you
+#}}}

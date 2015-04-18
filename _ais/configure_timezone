@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#CONFIGURE TIMEZONE {{{
+configure_timezone(){
+    print_title "TIMEZONE - https://wiki.archlinux.org/index.php/Timezone"
+    print_info "In an operating system the time (clock) is determined by four parts: Time value, Time standard, Time Zone, and DST (Daylight Saving Time if applicable)."
+    OPTION=n
+  
+    while [[ $OPTION != y ]]; do
+        settimezone
+        read_input_text "Confirm timezone (${ZONE}/${SUBZONE})"
+    done
+  
+    arch_chroot "ln -s /usr/share/zoneinfo/${ZONE}/${SUBZONE} /etc/localtime"
+}
+#}}}

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#CONFIGURE HARDWARECLOCK {{{
+configure_hardwareclock(){
+    print_title "HARDWARE CLOCK TIME - https://wiki.archlinux.org/index.php/Internationalization"
+    print_info "This is set in /etc/adjtime. Set the hardware clock mode uniformly between your operating systems on the same machine. Otherwise, they will overwrite the time and cause clock shifts (which can cause time drift correction to be miscalibrated)."
+    hwclock_list=('UTC' 'Localtime');
+    PS3="$prompt1"
+    
+    select OPT in "${hwclock_list[@]}"; do
+        case "$REPLY" in
+          1) arch_chroot "hwclock --systohc --utc";
+            ;;
+          2) arch_chroot "hwclock --systohc --localtime";
+            ;;
+          *) invalid_option ;;
+        esac
+        [[ -n $OPT ]] && break
+    done
+}
+#}}}

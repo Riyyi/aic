@@ -1,0 +1,61 @@
+#!/bin/bash
+
+error_msg() { #{{{
+    local _msg="${1}"
+    echo -e "${Red}${_msg}${Reset}"
+    exit 1
+} #}}}
+
+checkbox() { #{{{
+    #display [X] or [ ]
+    [[ "$1" -eq 1 ]] && echo -e "${BBlue}[${Reset}${Bold}X${BBlue}]${Reset}" || echo -e "${BBlue}[ ${BBlue}]${Reset}";
+} #}}}
+
+invalid_option() { #{{{
+    print_line
+    echo "Invalid option. Try another one."
+    pause_function
+} #}}}
+
+menu_item() { #{{{
+    #check if the number of arguments is less then 2
+    [[ $# -lt 2 ]] && _package_name="$1" || _package_name="$2";
+    #list of chars to remove from the package name
+    local _chars=("Ttf-" "-bzr" "-hg" "-svn" "-git" "-stable" "-icon-theme" "Gnome-shell-theme-" "Gnome-shell-extension-");
+    #remove chars from package name
+    for char in ${_chars[@]}; do _package_name=`echo ${_package_name^} | sed 's/'$char'//'`; done
+    #display checkbox and package name
+    echo -e "$(checkbox_package "$1") ${Bold}${_package_name}${Reset}"
+} #}}}
+
+mainmenu_item() { #{{{
+    echo -e "$(checkbox "$1") ${Bold}$2${Reset}"
+} #}}}
+
+print_line() { #{{{
+    printf "%$(tput cols)s\n"|tr ' ' '-'
+} #}}}
+  
+print_title() { #{{{
+    clear
+    print_line
+    echo -e "# ${Bold}$1${Reset}"
+    print_line
+    echo ""
+} #}}}
+
+print_info() { #{{{
+    #Console width number
+    T_COLS=`tput cols`
+    echo -e "${Bold}$1${Reset}\n" | fold -sw $(( $T_COLS - 18 )) | sed 's/^/\t/'
+} #}}}
+
+print_warning() { #{{{
+    T_COLS=`tput cols`
+    echo -e "${BYellow}$1${Reset}\n" | fold -sw $(( $T_COLS - 1 ))
+} #}}}
+
+print_danger() { #{{{
+    T_COLS=`tput cols`
+    echo -e "${BRed}$1${Reset}\n" | fold -sw $(( $T_COLS - 1 ))
+} #}}}
