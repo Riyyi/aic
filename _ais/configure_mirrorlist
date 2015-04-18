@@ -12,7 +12,7 @@ configure_mirrorlist(){
         
         select country_name in "${countries_name[@]}"; do
             if contains_element "$country_name" "${countries_name[@]}"; then
-                contry_code=${countries_code[$(( $REPLY - 1 ))]}
+                country_code=${countries_code[$(( $REPLY - 1 ))]}
                 break
             else
                 invalid_option
@@ -26,7 +26,7 @@ configure_mirrorlist(){
     # @AUTOMATIC_MODE
     if [[ $AUTOMATIC_MODE -eq 1 ]]; then
         OPTION=y
-        echo "Selected country: $contry_code"
+        echo "Selected country: $country_code"
         sleep 1
     else
         OPTION=n
@@ -37,7 +37,7 @@ configure_mirrorlist(){
         read_input_text "Confirm country: $country_name"
     done
 
-    url="https://www.archlinux.org/mirrorlist/?country=${contry_code}&use_mirror_status=on"
+    url="https://www.archlinux.org/mirrorlist/?country=${country_code}&use_mirror_status=on"
 
     tmpfile=$(mktemp --suffix=-mirrorlist)
 
@@ -64,6 +64,10 @@ configure_mirrorlist(){
     rm /etc/pacman.d/mirrorlist.tmp
     # allow global read access (required for non-root yaourt execution)
     chmod +r /etc/pacman.d/mirrorlist
-    $EDITOR /etc/pacman.d/mirrorlist
+    
+    # @AUTOMATIC_MODE
+    if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+        $EDITOR /etc/pacman.d/mirrorlist
+    fi
 }
 #}}}

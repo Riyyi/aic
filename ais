@@ -46,7 +46,8 @@ do
   echo ""
   echo " d) Done"
   echo ""
-  read_input_options
+  MAINMENU+=" d"
+  read_input_options "$MAINMENU"
   for OPT in ${OPTIONS[@]}; do
     case "$OPT" in
       1)
@@ -54,7 +55,7 @@ do
         checklist[1]=1
         ;;
       2)
-        select_editor #! automatic mode
+        select_editor
         checklist[2]=1
         ;;
       3)
