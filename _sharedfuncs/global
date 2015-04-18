@@ -39,6 +39,8 @@
     #}}}
     
     AUI_DIR=`pwd` #CURRENT DIRECTORY
+    LOG="${AUI_DIR}/`basename ${0}`_error.log" # LOG FILE
+    SPIN="/-\|" #SPINNER POSITION
     AUTOMATIC_MODE=0
     TRIM=0
 #}}}

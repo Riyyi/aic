@@ -49,25 +49,25 @@ configure_mirrorlist(){
     if [[ -s ${tmpfile} ]]; then
     {   
         echo " Backing up the original mirrorlist..."
-        mv -i ${MOUNTPOINT}/etc/pacman.d/mirrorlist ${MOUNTPOINT}/etc/pacman.d/mirrorlist.orig;
+        mv -i /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.orig;
     } && {
         echo " Rotating the new list into place..."
-        mv -i ${tmpfile} ${MOUNTPOINT}/etc/pacman.d/mirrorlist;
+        mv -i ${tmpfile} /etc/pacman.d/mirrorlist;
     }
     else
         echo " Unable to update, could not download list."
     fi
   
     # better repo should go first
-    cp ${MOUNTPOINT}/etc/pacman.d/mirrorlist ${MOUNTPOINT}/etc/pacman.d/mirrorlist.tmp
-    rankmirrors ${MOUNTPOINT}/etc/pacman.d/mirrorlist.tmp > ${MOUNTPOINT}/etc/pacman.d/mirrorlist
-    rm ${MOUNTPOINT}/etc/pacman.d/mirrorlist.tmp
+    cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.tmp
+    rankmirrors /etc/pacman.d/mirrorlist.tmp > /etc/pacman.d/mirrorlist
+    rm /etc/pacman.d/mirrorlist.tmp
     # allow global read access (required for non-root yaourt execution)
-    chmod +r ${MOUNTPOINT}/etc/pacman.d/mirrorlist
+    chmod +r /etc/pacman.d/mirrorlist
     
     # @AUTOMATIC_MODE
     if [[ $AUTOMATIC_MODE -ne 1 ]]; then
-        $EDITOR ${MOUNTPOINT}/etc/pacman.d/mirrorlist
+        $EDITOR /etc/pacman.d/mirrorlist
     fi
 }
 #}}}

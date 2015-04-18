@@ -1,5 +1,14 @@
 #!/bin/bash
 
+is_package_installed() { #{{{
+    #check if a package is already installed
+    for PKG in $1; do
+        pacman -Q $PKG &> /dev/null && return 0;
+    done
+    
+    return 1
+} #}}}
+
 package_install() { #{{{
     #install packages using pacman
     if [[ $AUTOMATIC_MODE -eq 1 || $VERBOSE_MODE -eq 0 ]]; then

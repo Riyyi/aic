@@ -5,6 +5,46 @@ error_msg() { #{{{
     echo -e "${Red}${_msg}${Reset}"
     exit 1
 } #}}}
+  
+cecho() { #{{{
+    echo -e "$1"
+    echo -e "$1" >>"$LOG"
+    tput sgr0;
+} #}}}
+
+ncecho() { #{{{
+    echo -ne "$1"
+    echo -ne "$1" >>"$LOG"
+    tput sgr0
+} #}}}
+
+spinny() { #{{{
+    echo -ne "\b${SPIN:i++%${#SPIN}:1}"
+} #}}}
+
+progress() { #{{{
+    ncecho "  ";
+    while true; do
+        kill -0 $pid &> /dev/null;
+        if [[ $? == 0 ]]; then
+            spinny
+            sleep 0.25
+        else
+            ncecho "\b\b";
+            wait $pid
+            retcode=$?
+            echo -ne "$pid's retcode: $retcode" >> $LOG
+            if [[ $retcode == 0 ]] || [[ $retcode == 255 ]]; then
+                cecho success
+            else
+                cecho failed
+                echo -e "$PKG" >> $PKG_FAIL
+                tail -n 15 $LOG
+            fi
+            break
+        fi
+    done
+} #}}}
 
 checkbox() { #{{{
     #display [X] or [ ]
