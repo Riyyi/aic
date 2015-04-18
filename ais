@@ -25,6 +25,7 @@ check_connection
 check_trim
 # Update mirrorlist
 pacman -Sy
+automatic_mode
 
 while true
 do

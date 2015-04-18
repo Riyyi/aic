@@ -14,10 +14,18 @@
     #11) Configure Mkinitcpio
     #12) Install Bootloader
     #13) Root Password
-    MAINMENU="1-13"
+    MAINMENU="1-3"
 #}}}
 
 #SELECT KEYMAP {{{
+    # Some keyboard layout examples:
+    # us (default)
+    # uk
+    # azerty
+    # dvorak
+    # colemak
+    # dvorak-l
+    # dvorak-r
     KEYMAP="dvorak"
 #}}}
 

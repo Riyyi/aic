@@ -38,6 +38,7 @@
         MOUNTPOINT="/mnt"
     #}}}
     
+    AUI_DIR=`pwd` #CURRENT DIRECTORY
     AUTOMATIC_MODE=0
     TRIM=0
 #}}}
