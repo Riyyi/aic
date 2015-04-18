@@ -5,13 +5,11 @@ select_editor(){
     editors_list=("emacs" "nano" "vi" "vim" "zile");
 
     editor_list(){
-        #`reflector --list-countries | sed 's/[0-9]//g' | sed 's/^/"/g' | sed 's/,.*//g' | sed 's/ *$//g'  | sed 's/$/"/g' | sed -e :a -e '$!N; s/\n/ /; ta'`
         PS3="$prompt1"
         echo -e "Select editor\n"
 
         select EDITOR in "${editors_list[@]}"; do
             if contains_element "$EDITOR" "${editors_list[@]}"; then
-                package_install "$EDITOR"
                 break
             else
                 invalid_option
@@ -25,6 +23,7 @@ select_editor(){
     if [[ $AUTOMATIC_MODE -eq 1 ]]; then
         OPTION=y
         echo "Selected editor: $EDITOR"
+        package_install "$EDITOR"
         sleep 1
     else
         OPTION=n
@@ -33,6 +32,7 @@ select_editor(){
     while [[ $OPTION != y ]]; do
         editor_list
         read_input_text "Confirm editor: $EDITOR"
+        package_install "$EDITOR"
     done
 }
 #}}}
