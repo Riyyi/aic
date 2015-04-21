@@ -83,3 +83,7 @@
     # "UTC" "Localtime"
     HARDWARE_CLOCK="UTC"
 #}}}
+
+#CONFIGURE HOSTNAME {{{
+    HOST_NAME="arch-laptop"
+#}}}
