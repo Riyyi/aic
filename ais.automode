@@ -50,7 +50,7 @@
     # "ES" "LK" "SE" "CH" "TW"
     # "TR" "UA" "GB" "US" "UZ"
     # "VN"
-    contry_code="NL"                    # Select closest country to you
+    country_code="NL"                    # Select closest country to you
 #}}}
 
 #PARTITION SCHEME {{{

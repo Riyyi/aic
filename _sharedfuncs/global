@@ -40,6 +40,10 @@
     
     AUI_DIR=`pwd` #CURRENT DIRECTORY
     LOG="${AUI_DIR}/`basename ${0}`_error.log" # LOG FILE
+    [[ -f $LOG ]] && rm -f $LOG
+    PKG=""
+    PKG_FAIL="${AUI_DIR}/`basename ${0}`_pkg_fail_list.log"
+    [[ -f $PKG_FAIL ]] && rm -f $PKG_FAIL
     SPIN="/-\|" #SPINNER POSITION
     AUTOMATIC_MODE=0
     TRIM=0
