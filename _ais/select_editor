@@ -18,8 +18,8 @@ select_editor(){
     }
 
     print_title "DEFAULT EDITOR"
-
     OPTION=n
+    
     while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
         editor_list
         read_input_text "Confirm editor: $EDITOR"

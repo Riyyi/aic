@@ -22,6 +22,7 @@ configure_fstab(){
     
     print_title "FSTAB - https://wiki.archlinux.org/index.php/Fstab"
     print_info "The /etc/fstab file contains static filesystem information. It defines how storage devices and partitions are to be mounted and integrated into the overall system. It is read by the mount command to determine which options to use when mounting a specific partition or partition."
+    OPTION=n
     
     if [[ ! -f ${MOUNTPOINT}/etc/fstab.aui ]]; then
         cp ${MOUNTPOINT}/etc/fstab ${MOUNTPOINT}/etc/fstab.aui
@@ -29,9 +30,9 @@ configure_fstab(){
         cp ${MOUNTPOINT}/etc/fstab.aui ${MOUNTPOINT}/etc/fstab
     fi
     
-    OPTION=n
     while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
         fstab_list
+        read_input_text "Confirm fstab: $FSTAB"
     done
     
     case "$FSTAB" in

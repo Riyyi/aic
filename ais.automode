@@ -61,3 +61,25 @@
     # BIOS: "DEV" "UUID"     "LABEL"
     FSTAB="UUID"
 #}}}
+
+#CONFIGURE LOCALE {{{
+    # Some locale examples:
+    # "en_US" "en_GB" "nl_NL" "zh_CH"
+    LOCALE="en_US"
+    LOCALE_UTF8="${LOCALE}.UTF-8"
+#}}}
+
+#CONFIGURE TIMEZONE {{{
+    # Some timezone examples:
+    # Zone:
+    # "America" "Europe" "Australia"
+    # Subzone:
+    # "New_York" "Amsterdam" "Sydney"
+    ZONE="Europe"
+    SUBZONE="Amsterdam"
+#}}}
+
+#CONFIGURE HARDWARECLOCK {{{
+    # "UTC" "Localtime"
+    HARDWARE_CLOCK="UTC"
+#}}}

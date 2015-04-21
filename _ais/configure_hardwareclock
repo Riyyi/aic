@@ -2,20 +2,37 @@
 
 #CONFIGURE HARDWARECLOCK {{{
 configure_hardwareclock(){
+    hwclocks_list=('UTC' 'Localtime');
+    
+    hwclock_list(){
+        PS3="$prompt1"
+        echo -e "Select hardware clock\n"
+
+        select HARDWARE_CLOCK in "${hwclocks_list[@]}"; do
+            if contains_element "$HARDWARE_CLOCK" "${hwclocks_list[@]}"; then
+                break
+            else
+                invalid_option
+            fi
+        done
+    }
+    
     print_title "HARDWARE CLOCK TIME - https://wiki.archlinux.org/index.php/Internationalization"
     print_info "This is set in /etc/adjtime. Set the hardware clock mode uniformly between your operating systems on the same machine. Otherwise, they will overwrite the time and cause clock shifts (which can cause time drift correction to be miscalibrated)."
-    hwclock_list=('UTC' 'Localtime');
-    PS3="$prompt1"
-    
-    select OPT in "${hwclock_list[@]}"; do
-        case "$REPLY" in
-          1) arch_chroot "hwclock --systohc --utc";
-            ;;
-          2) arch_chroot "hwclock --systohc --localtime";
-            ;;
-          *) invalid_option ;;
-        esac
-        [[ -n $OPT ]] && break
+    OPTION=n
+
+    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+        hwclock_list
+        read_input_text "Confirm hardware clock: $EDITOR"
     done
+    
+    case "$HARDWARE_CLOCK" in
+        1) arch_chroot "hwclock --systohc --utc";
+           ;;
+        2) arch_chroot "hwclock --systohc --localtime";
+           ;;
+        *) invalid_option ;;
+    esac
+    [[ -n $HARDWARE_CLOCK ]] && break
 }
 #}}}

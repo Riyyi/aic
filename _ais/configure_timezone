@@ -6,7 +6,7 @@ configure_timezone(){
     print_info "In an operating system the time (clock) is determined by four parts: Time value, Time standard, Time Zone, and DST (Daylight Saving Time if applicable)."
     OPTION=n
   
-    while [[ $OPTION != y ]]; do
+    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
         settimezone
         read_input_text "Confirm timezone (${ZONE}/${SUBZONE})"
     done
