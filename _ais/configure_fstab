@@ -2,6 +2,24 @@
 
 #CONFIGURE FSTAB {{{
 configure_fstab(){
+    if [[ $UEFI -eq 1 ]]; then
+        fstabs_list=("DEV" "PARTUUID" "LABEL");
+    else
+        fstabs_list=("DEV" "UUID" "LABEL");
+    fi
+       
+    fstab_list(){
+        PS3="$prompt1"
+        echo -e "Configure fstab based on:"
+        select FSTAB in "${fstab_list[@]}"; do
+            if contains_element "$FSTAB" "${fstabs_list[@]}"; then
+                break
+            else
+                invalid_option
+            fi
+        done
+    }
+    
     print_title "FSTAB - https://wiki.archlinux.org/index.php/Fstab"
     print_info "The /etc/fstab file contains static filesystem information. It defines how storage devices and partitions are to be mounted and integrated into the overall system. It is read by the mount command to determine which options to use when mounting a specific partition or partition."
     
@@ -11,32 +29,30 @@ configure_fstab(){
         cp ${MOUNTPOINT}/etc/fstab.aui ${MOUNTPOINT}/etc/fstab
     fi
     
-    if [[ $UEFI -eq 1 ]]; then
-        fstab_list=("DEV" "PARTUUID" "LABEL");
-    else
-        fstab_list=("DEV" "UUID" "LABEL");
-    fi
-
-    PS3="$prompt1"
-    echo -e "Configure fstab based on:"
-    select OPT in "${fstab_list[@]}"; do
-        case "$REPLY" in
-            1) genfstab -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
-            2)  if [[ $UEFI -eq 1 ]]; then
-                   genfstab -t PARTUUID -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
-                else
-                    genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
-                fi
-                ;;
-            3) genfstab -L -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
-            *) invalid_option ;;
-        esac
-        [[ -n $OPT ]] && break
+    OPTION=n
+    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+        fstab_list
     done
+    
+    case "$FSTAB" in
+        1) genfstab -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
+        2)  if [[ $UEFI -eq 1 ]]; then
+                genfstab -t PARTUUID -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+            else
+                genfstab -U -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab
+            fi
+            ;;
+        3) genfstab -L -p ${MOUNTPOINT} >> ${MOUNTPOINT}/etc/fstab ;;
+        *) invalid_option ;;
+    esac
+    [[ -n $FSTAB ]] && break
   
     echo "Review your fstab"
     [[ -f ${MOUNTPOINT}/swapfile ]] && sed -i "s/\\${MOUNTPOINT}//" ${MOUNTPOINT}/etc/fstab
-    pause_function
-    $EDITOR ${MOUNTPOINT}/etc/fstab
+
+    if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+        pause_function
+        $EDITOR ${MOUNTPOINT}/etc/fstab
+    fi
 }
 #}}}

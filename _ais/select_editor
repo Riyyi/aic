@@ -18,21 +18,13 @@ select_editor(){
     }
 
     print_title "DEFAULT EDITOR"
-    
-    # @AUTOMATIC_MODE
-    if [[ $AUTOMATIC_MODE -eq 1 ]]; then
-        OPTION=y
-        echo "Selected editor: $EDITOR"
-        package_install "$EDITOR"
-        sleep 1
-    else
-        OPTION=n
-    fi
-    
-    while [[ $OPTION != y ]]; do
+
+    OPTION=n
+    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
         editor_list
         read_input_text "Confirm editor: $EDITOR"
-        package_install "$EDITOR"
     done
+    
+    package_install "$EDITOR"
 }
 #}}}

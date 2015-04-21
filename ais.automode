@@ -52,3 +52,12 @@
     # "VN"
     contry_code="NL"                    # Select closest country to you
 #}}}
+
+#PARTITION SCHEME {{{
+#}}}
+
+#CONFIGURE FSTAB {{{
+    # UEFI: "DEV" "PARTUUID" "LABEL"
+    # BIOS: "DEV" "UUID"     "LABEL"
+    FSTAB="UUID"
+#}}}
