@@ -2,11 +2,6 @@
 
 #INSTALL BOOTLOADER {{{
 install_bootloader(){
-    print_title "BOOTLOADER - https://wiki.archlinux.org/index.php/Bootloader"
-    print_info "The boot loader is responsible for loading the kernel and initial RAM disk before initiating the boot process."
-    print_warning "\tROOT Partition: ${ROOT_MOUNTPOINT}"
-    print_warning "\tWARNING: There is no support for GRUB + LUKS/LVM."
-  
     if [[ $UEFI -eq 1 ]]; then
         print_warning "\tUEFI Mode Detected"
         bootloaders_list=("Grub2" "Syslinux" "Gummiboot" "Skip")
@@ -14,31 +9,52 @@ install_bootloader(){
         print_warning "\tBIOS Mode Detected"
         bootloaders_list=("Grub2" "Syslinux" "Skip")
     fi
-  
-    PS3="$prompt1"
-    echo -e "Install bootloader:\n"
-    select bootloader in "${bootloaders_list[@]}"; do
-        case "$REPLY" in
-            1)
-                pacstrap ${MOUNTPOINT} grub os-prober
+    
+    bootloader_list(){
+        PS3="$prompt1"
+        echo -e "Install bootloader:\n"
+
+        select BOOTLOADER in "${bootloaders_list[@]}"; do
+            if contains_element "$EDITOR" "${bootloaders_list[@]}"; then
                 break
-                ;;
-            2)
-                pacstrap ${MOUNTPOINT} syslinux gptfdisk
-                break
-                ;;
-            3)
-                [[ $UEFI -eq 1 ]] && pacstrap ${MOUNTPOINT} gummiboot
-                break
-                ;;
-            4)
-                [[ $UEFI -eq 1 ]] && break || invalid_option
-                ;;
-            *)
+            else
                 invalid_option
-                ;;
-        esac
+            fi
+        done
+    }
+    
+    print_title "BOOTLOADER - https://wiki.archlinux.org/index.php/Bootloader"
+    print_info "The boot loader is responsible for loading the kernel and initial RAM disk before initiating the boot process."
+    print_warning "\tROOT Partition: ${ROOT_MOUNTPOINT}"
+    print_warning "\tWARNING: There is no support for GRUB + LUKS/LVM."
+    OPTION=n
+    
+    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+        bootloader_list
+        read_input_text "Confirm bootloader: $BOOTLOADER"
     done
+
+    case "$BOOTLOADER" in
+        1)
+            pacstrap ${MOUNTPOINT} grub os-prober
+            break
+            ;;
+        2)
+            pacstrap ${MOUNTPOINT} syslinux gptfdisk
+            break
+            ;;
+        3)
+            [[ $UEFI -eq 1 ]] && pacstrap ${MOUNTPOINT} gummiboot
+            break
+            ;;
+        4)
+            [[ $UEFI -eq 1 ]] && break || invalid_option
+            ;;
+        *)
+            invalid_option
+            ;;
+    esac
+        
     [[ $UEFI -eq 1 ]] && pacstrap ${MOUNTPOINT} efibootmgr dosfstools
 }
 #}}}

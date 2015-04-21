@@ -14,7 +14,7 @@
     #11) Configure Mkinitcpio
     #12) Install Bootloader
     #13) Root Password
-    MAINMENU="1-3"
+    MAINMENU="1-13"
 #}}}
 
 #SELECT KEYMAP {{{
@@ -86,4 +86,15 @@
 
 #CONFIGURE HOSTNAME {{{
     HOST_NAME="arch-laptop"
+#}}}
+
+#INSTALL BOOTLOADER {{{
+    # UEFI: "Grub2" "Syslinux" "Gummiboot" "Skip"
+    # BIOS: "Grub2" "Syslinux" "Skip"
+    BOOTLOADER="Grub2"
+    # Grub2: "Automatic" "Manual"
+    # Syslinux: "[MBR] Automatic" "[PARTITION] Automatic" "Manual"
+    # Gummiboot: "Automatic" "Manual"
+    # "Skip"
+    BOOTLOADER_MODE="Automatic"
 #}}}
