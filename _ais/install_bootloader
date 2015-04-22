@@ -29,7 +29,7 @@ install_bootloader(){
     print_warning "\tWARNING: There is no support for GRUB + LUKS/LVM."
     OPTION=n
     
-    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+    while [[ $AUTOMATIC_MODE -ne 1 && $OPTION != y ]]; do
         bootloader_list
         read_input_text "Confirm bootloader: $BOOTLOADER"
     done

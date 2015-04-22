@@ -21,7 +21,7 @@ configure_hardwareclock(){
     print_info "This is set in /etc/adjtime. Set the hardware clock mode uniformly between your operating systems on the same machine. Otherwise, they will overwrite the time and cause clock shifts (which can cause time drift correction to be miscalibrated)."
     OPTION=n
 
-    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+    while [[ $AUTOMATIC_MODE -ne 1 && $OPTION != y ]]; do
         hwclock_list
         read_input_text "Confirm hardware clock: $EDITOR"
     done

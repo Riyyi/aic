@@ -6,12 +6,12 @@ select_keymap(){
     print_info "The KEYMAP variable is specified in the /etc/rc.conf file. It defines what keymap the keyboard is in the virtual consoles. Keytable files are provided by the kbd package."
     OPTION=n
     
-    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+    while [[ $AUTOMATIC_MODE -ne 1 && $OPTION != y ]]; do
         getkeymap
         read_input_text "Confirm keymap: $KEYMAP"
     done
     
-    loadkeys $KEYMAP
+    loadkeys "$KEYMAP"
 }
 #}}}
 

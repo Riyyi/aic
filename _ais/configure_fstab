@@ -11,7 +11,7 @@ configure_fstab(){
     fstab_list(){
         PS3="$prompt1"
         echo -e "Configure fstab based on:"
-        select FSTAB in "${fstab_list[@]}"; do
+        select FSTAB in "${fstabs_list[@]}"; do
             if contains_element "$FSTAB" "${fstabs_list[@]}"; then
                 break
             else
@@ -30,7 +30,7 @@ configure_fstab(){
         cp ${MOUNTPOINT}/etc/fstab.aui ${MOUNTPOINT}/etc/fstab
     fi
     
-    while [[ $AUTOMATIC_MODE -ne 1 -a $OPTION != y ]]; do
+    while [[ $AUTOMATIC_MODE -ne 1 && $OPTION != y ]]; do
         fstab_list
         read_input_text "Confirm fstab: $FSTAB"
     done
