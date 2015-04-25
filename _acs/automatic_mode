@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#AUTOMODE {{{
+automatic_mode(){
+    print_title "AUTOMODE"
+    print_info "Create a custom install with all options pre-selected.\nUse this option with care."
+    print_danger "\tUse this mode only if you already know all the option.\n\tYou won't be able to select anything later."
+    read_input_text "Enable Automatic Mode"
+
+    if [[ $OPTION == y ]]; then
+        $EDITOR ${AUI_DIR}/acs.automode
+        source ${AUI_DIR}/acs.automode
+        echo -e "The installation will start now."
+        pause_function
+        AUTOMATIC_MODE=1
+    fi
+}
+#}}}

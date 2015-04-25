@@ -1,5 +1,18 @@
 #!/bin/bash
 
+pacman_key(){ #{{{
+    if [[ ! -d /etc/pacman.d/gnupg ]]; then
+        print_title "PACMAN KEY - https://wiki.archlinux.org/index.php/pacman-key"
+        print_info "Pacman uses GnuPG keys in a web of trust model to determine if packages are authentic."
+        package_install "haveged"
+        haveged -w 1024
+        pacman-key --init
+        pacman-key --populate archlinux
+        pkill haveged
+        package_remove "haveged"
+    fi
+} #}}}
+
 is_package_installed() { #{{{
     #check if a package is already installed
     for PKG in $1; do
@@ -7,6 +20,43 @@ is_package_installed() { #{{{
     done
     
     return 1
+} #}}}
+
+aui_download_packages() { #{{{
+    for PKG in $1; do
+        #exec command as user instead of root
+        su - ${username} -c "
+        [[ ! -d aui_packages ]] && mkdir aui_packages
+        cd aui_packages
+        curl -o ${PKG}.tar.gz https://aur.archlinux.org/packages/${PKG:0:2}/${PKG}/${PKG}.tar.gz
+        tar zxvf ${PKG}.tar.gz
+        rm ${PKG}.tar.gz
+        cd ${PKG}
+        makepkg -csi --noconfirm
+        "
+    done
+} #}}}
+
+aur_package_install() { #{{{
+    su - ${username} -c "sudo -v"
+    #install package from aur
+    for PKG in $1; do
+        if ! is_package_installed "${PKG}" ; then
+            if [[ $AUTOMATIC_MODE -eq 1 ]]; then
+                ncecho " ${BBlue}[${Reset}${Bold}X${BBlue}]${Reset} Installing ${AUR} ${Bold}${PKG}${Reset} "
+                su - ${username} -c "${AUR_PKG_MANAGER} --noconfirm -S ${PKG}" >>"$LOG" 2>&1 &
+                pid=$!;progress $pid
+            else
+                su - ${username} -c "${AUR_PKG_MANAGER} -S ${PKG}"
+            fi
+        else
+            if [[ $VERBOSE_MODE -eq 0 ]]; then
+                cecho " ${BBlue}[${Reset}${Bold}X${BBlue}]${Reset} Installing ${AUR} ${Bold}${PKG}${Reset} success"
+            else
+                echo -e "Warning: ${PKG} is up to date --skipping"
+            fi
+        fi
+    done
 } #}}}
 
 package_install() { #{{{
@@ -40,4 +90,23 @@ package_install() { #{{{
     else
         pacman -S --needed ${1}
     fi
+} #}}}
+
+package_remove() { #{{{
+    #remove package
+    for PKG in ${1}; do
+        if is_package_installed "${PKG}" ; then
+            if [[ $AUTOMATIC_MODE -eq 1 || $VERBOSE_MODE -eq 0 ]]; then
+                ncecho " ${BBlue}[${Reset}${Bold}X${BBlue}]${Reset} Removing ${Bold}${PKG}${Reset} "
+                pacman -Rcsn --noconfirm ${PKG} >>"$LOG" 2>&1 &
+                pid=$!;progress $pid
+            else
+                pacman -Rcsn ${PKG}
+            fi
+        fi
+    done
+} #}}}
+
+system_update() { #{{{
+    pacman -Syy
 } #}}}

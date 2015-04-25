@@ -1,0 +1,155 @@
+#!/bin/bash
+
+#SELECT/CREATE USER {{{
+select_user(){
+    #CREATE NEW USER {{{
+    create_new_user(){
+        read -p "Username: " username
+        username=$(echo "$username" | tr '[:upper:]' '[:lower:]')
+        useradd -m -g users -G wheel -s /bin/bash "${username}"
+        chfn "${username}"
+        passwd "${username}"
+        
+        while [[ $? -ne 0 ]]; do
+            passwd "${username}"
+        done
+
+        pause_function
+        configure_user_account
+    }
+    #}}}
+
+    #CONFIGURE USER ACCOUNT {{{
+    configure_user_account(){
+        #BASHRC {{{
+        print_title "BASHRC - https://wiki.archlinux.org/index.php/Bashrc"
+        bashrc_list=("Default" "Vanilla" "Get from github");
+        PS3="$prompt1"
+        echo -e "Choose your .bashrc\n"
+
+        select OPT in "${bashrc_list[@]}"; do
+            case "$REPLY" in
+                1)
+                    package_install "git"
+                    git clone https://github.com/helmuthdu/dotfiles
+                    cp dotfiles/.bashrc dotfiles/.dircolors dotfiles/.dircolors_256 dotfiles/.nanorc dotfiles/.yaourtrc ~/
+                    cp dotfiles/.bashrc dotfiles/.dircolors dotfiles/.dircolors_256 dotfiles/.nanorc dotfiles/.yaourtrc /home/"${username}"/
+                    rm -fr dotfiles
+                    ;;
+                2)
+                    cp /etc/skel/.bashrc /home/"${username}"
+                    ;;
+                3)
+                    package_install "git"
+                    read -p "Enter your github username [ex: riyyi]: " GITHUB_USER
+                    read -p "Enter your github repository [ex: aic]: " GITHUB_REPO
+                    git clone https://github.com/"$GITHUB_USER"/"$GITHUB_REPO"
+                    cp -R "$GITHUB_REPO"/.* /home/"${username}"/
+                    rm -fr "$GITHUB_REPO"
+                    ;;
+                *)
+                    invalid_option
+                    ;;
+            esac
+            [[ -n $OPT ]] && break
+        done
+    #}}}
+
+    #EDITOR {{{
+    print_title "DEFAULT EDITOR"
+    editors_list=("emacs" "nano" "vi" "vim" "zile");
+    PS3="$prompt1"
+    echo -e "Select editor\n"
+
+    select EDITOR in "${editors_list[@]}"; do
+        if contains_element "$EDITOR" "${editors_list[@]}"; then
+            if [[ $EDITOR == vim ]]; then
+                ! is_package_installed "gvim" && package_install "vim ctags"
+                
+                #VIMRC {{{
+                if [[ ! -f /home/${username}/.vimrc ]]; then
+                    vimrc_list=("Default" "Vanilla" "Get from github");
+                    PS3="$prompt1"
+                    echo -e "Choose your .vimrc\n"
+                    
+                    select OPT in "${vimrc_list[@]}"; do
+                        case "$REPLY" in
+                            1)
+                                package_install "git"
+                                git clone https://github.com/helmuthdu/vim
+                                mv vim /home/${username}/.vim
+                                ln -sf /home/${username}/.vim/vimrc /home/${username}/.vimrc
+                                cp -R vim /home/${username}/.vim/fonts /home/${username}/.fonts
+                                ;;
+                            2)
+                                echo "Nothing to do..."
+                                ;;
+                            3)
+                                package_install "git"
+                                read -p "Enter your github username [ex: helmuthdu]: " GITHUB_USER
+                                read -p "Enter your github repository [ex: vim]: " GITHUB_REPO
+                                git clone https://github.com/$GITHUB_USER/$GITHUB_REPO
+                                cp -R $GITHUB_REPO/.vim /home/${username}/
+                                
+                                if [[ -f $GITHUB_REPO/vimrc ]]; then
+                                    ln -sf /home/${username}/.vim/vimrc /home/${username}/.vimrc
+                                else
+                                    ln -sf /home/${username}/.vim/.vimrc /home/${username}/.vimrc
+                                fi
+                                
+                                rm -fr $GITHUB_REPO
+                                ;;
+                            *)
+                                invalid_option
+                                ;;
+                        esac
+
+                        [[ -n $OPT ]] && break
+                    done
+                fi
+                #}}}
+            else
+                package_install "$EDITOR"
+            fi
+            break
+        else
+            invalid_option
+        fi
+    done
+    #}}}
+
+    chown -R ${username}:users /home/${username}
+    }
+    #}}}
+
+    print_title "SELECT/CREATE USER - https://wiki.archlinux.org/index.php/Users_and_Groups"
+    users_list=(`cat /etc/passwd | grep "/home" | cut -d: -f1`);
+    PS3="$prompt1"
+    echo "Avaliable Users:"
+
+    if [[ $(( ${#users_list[@]} )) -gt 0 ]]; then
+        print_warning "WARNING: THE SELECTED USER MUST HAVE SUDO PRIVILEGES"
+    else
+        echo ""
+    fi
+
+    select OPT in "${users_list[@]}" "Create new user"; do
+        if [[ $OPT == "Create new user" ]]; then
+            create_new_user
+        elif contains_element "$OPT" "${users_list[@]}"; then
+            username=$OPT
+        else
+            invalid_option
+        fi
+
+        [[ -n $OPT ]] && break
+    done
+
+    [[ ! -f /home/"${username}"/.bashrc ]] && configure_user_account;
+
+    if [ -n "$http_proxy" ]; then
+        echo "proxy = $http_proxy" > /home/"${username}"/.curlrc
+        chown "${username}":users /home/"${username}"/.curlrc
+    fi
+}
+#}}}

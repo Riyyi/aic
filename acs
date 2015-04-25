@@ -1,0 +1,32 @@
+#!/bin/bash
+
+if [[ -f `pwd`/sharedfuncs ]]; then
+  . sharedfuncs
+else
+  echo "Missing file: sharedfuncs"
+  exit 1
+fi
+
+if [ -d _acs ]; then
+    for files in _acs/*; do
+        . $files
+    done
+else
+  echo "Missing directory: _acs"
+  exit 1
+fi
+
+welcome
+check_root
+check_archlinux
+check_hostname
+check_connection
+check_pacman_blocked
+check_multilib
+pacman_key
+system_update
+#language_selector
+configure_sudo
+select_user
+choose_aurhelper
+automatic_mode

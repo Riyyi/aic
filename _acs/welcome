@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#WELCOME {{{
+welcome(){
+	clear
+	echo -e "${Bold}Welcome to the Archlinux Install && Configure script by Riyyi${White}"
+	print_line
+	echo "Requirements:"
+	echo "-> Archlinux installation"
+	echo "-> Run script as root user"
+	echo "-> Working internet connection"
+	print_line
+	echo "Script can be cancelled at any time with CTRL+C"
+	print_line
+	echo "http://www.github.com/riyyi/aic"
+	print_line
+	echo -e "\nBackups:"
+	print_line
+	# backup old configs
+	[[ ! -f /etc/pacman.conf.aui ]] && cp -v /etc/pacman.conf /etc/pacman.conf.aui || echo "/etc/pacman.conf.aui";
+	[[ -f /etc/ssh/sshd_config.aui ]] && echo "/etc/ssh/sshd_conf.aui";
+	[[ -f /etc/sudoers.aui ]] && echo "/etc/sudoers.aui";
+	pause_function
+	echo ""
+}
+#}}}
