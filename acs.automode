@@ -1,1 +1,23 @@
 #!/bin/bash
+
+# @todo ask password to use beforehand (for Samba)
+
+#WELCOME {{{
+    EDITOR="nano"
+    USERNAME="rick"
+    AUR_HELPER="Yaourt"
+#}}}
+
+#MAINMENU {{{
+    # 1) Basic Setup
+    MAINMENU="1"
+#}}}
+
+#BASIC SETUP {{{
+    # y = yes, n = no
+    SSH=n
+    NFS=n
+    SAMBA=n
+    TLP=y
+    READAHEAD=y
+#}}}

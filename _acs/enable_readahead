@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#READAHEAD {{{
+enable_readahead(){
+    print_title "Readahead - https://wiki.archlinux.org/index.php/Improve_Boot_Performance"
+    print_info "Systemd comes with its own readahead implementation, this should in principle improve boot time. However, depending on your kernel version and the type of your hard drive, your mileage may vary (i.e. it might be slower)."
+    
+    read_input_text "Enable Readahead" $READAHEAD
+    
+    if [[ $OPTION == y ]]; then
+        system_ctl enable systemd-readahead-collect
+        system_ctl enable systemd-readahead-replay
+        pause_function
+    fi
+}
+#}}}

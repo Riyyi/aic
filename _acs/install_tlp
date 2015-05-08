@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#TLP {{{
+install_tlp(){
+    print_title "TLP - https://wiki.archlinux.org/index.php/Tlp"
+    print_info "TLP is an advanced power management tool for Linux. It is a pure command line tool with automated background tasks and does not contain a GUI."
+    
+    read_input_text "Install TLP" $TLP
+    
+    if [[ $OPTION == y ]]; then
+        package_install "tlp"
+        system_ctl enable tlp
+        system_ctl enable tlp-sleep
+        system_ctl mask systemd-rfkill
+        system_ctl enable tlp
+        tlp start
+        pause_function
+    fi
+}
+#}}}

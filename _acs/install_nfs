@@ -1,0 +1,18 @@
+#!/bin/bash
+
+ #NFS {{{
+install_nfs(){
+    print_title "NFS - https://wiki.archlinux.org/index.php/Nfs"
+    print_info "NFS allowing a user on a client computer to access files over a network in a manner similar to how local storage is accessed."
+    
+    read_input_text "Install nfs" $NFS
+    
+    if [[ $OPTION == y ]]; then
+        package_install "nfs-utils"
+        system_ctl enable rpcbind
+        system_ctl enable nfs-client.target
+        system_ctl enable remote-fs.target
+        pause_function
+    fi
+}
+#}}}

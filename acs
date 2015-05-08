@@ -28,5 +28,43 @@ system_update
 #language_selector
 configure_sudo
 select_user
-choose_aurhelper
+choose_aurhelper # @todo auto_mode
 automatic_mode
+
+while true
+do
+  print_title "ARCHLINUX U INSTALL - https://github.com/riyyi/aic"
+  echo " 1) $(mainmenu_item "${checklist[1]}" "Basic Setup")"
+  echo ""
+  echo " q) Quit"
+  echo ""
+  MAINMENU+=" q"
+  read_input_options "$MAINMENU"
+  for OPT in ${OPTIONS[@]}; do
+    case "$OPT" in
+      1)
+        #add_custom_repositories
+        install_basic_setup
+        install_ssh
+        install_nfs
+        install_samba
+        install_tlp
+        enable_readahead
+        install_zram
+        install_video_cards
+        install_xorg
+        font_config
+        install_cups
+        install_additional_firmwares
+        install_git_tor
+        checklist[1]=1
+        ;;
+      "q")
+        finish
+        ;;
+      *)
+        invalid_option
+        ;;
+    esac
+  done
+done

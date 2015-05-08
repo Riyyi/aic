@@ -1,0 +1,51 @@
+#!/bin/bash
+
+#SSH {{{
+install_ssh(){
+    print_title "SSH - https://wiki.archlinux.org/index.php/Ssh"
+    print_info "Secure Shell (SSH) is a network protocol that allows data to be exchanged over a secure channel between two computers."
+    
+    read_input_text "Install ssh" $SSH
+    
+    if [[ $OPTION == y ]]; then
+        package_install "openssh"
+        system_ctl enable sshd
+        [[ ! -f /etc/ssh/sshd_config.aui ]] && cp -v /etc/ssh/sshd_config /etc/ssh/sshd_config.aui;
+        
+        #CONFIGURE SSHD_CONF #{{{
+        sed -i '/Port 22/s/^#//' /etc/ssh/sshd_config
+        sed -i '/Protocol 2/s/^#//' /etc/ssh/sshd_config
+        sed -i '/HostKey \/etc\/ssh\/ssh_host_rsa_key/s/^#//' /etc/ssh/sshd_config
+        sed -i '/HostKey \/etc\/ssh\/ssh_host_dsa_key/s/^#//' /etc/ssh/sshd_config
+        sed -i '/HostKey \/etc\/ssh\/ssh_host_ecdsa_key/s/^#//' /etc/ssh/sshd_config
+        sed -i '/KeyRegenerationInterval/s/^#//' /etc/ssh/sshd_config
+        sed -i '/ServerKeyBits/s/^#//' /etc/ssh/sshd_config
+        sed -i '/SyslogFacility/s/^#//' /etc/ssh/sshd_config
+        sed -i '/LogLevel/s/^#//' /etc/ssh/sshd_config
+        sed -i '/LoginGraceTime/s/^#//' /etc/ssh/sshd_config
+        sed -i '/PermitRootLogin/s/^#//' /etc/ssh/sshd_config
+        sed -i '/HostbasedAuthentication/s/^#//' /etc/ssh/sshd_config
+        sed -i '/StrictModes/s/^#//' /etc/ssh/sshd_config
+        sed -i '/RSAAuthentication/s/^#//' /etc/ssh/sshd_config
+        sed -i '/PubkeyAuthentication/s/^#//' /etc/ssh/sshd_config
+        sed -i '/IgnoreRhosts/s/^#//' /etc/ssh/sshd_config
+        sed -i '/PermitEmptyPasswords/s/^#//' /etc/ssh/sshd_config
+        sed -i '/AllowTcpForwarding/s/^#//' /etc/ssh/sshd_config
+        sed -i '/AllowTcpForwarding no/d' /etc/ssh/sshd_config
+        sed -i '/X11Forwarding/s/^#//' /etc/ssh/sshd_config
+        sed -i '/X11Forwarding/s/no/yes/' /etc/ssh/sshd_config
+        sed -i -e '/\tX11Forwarding yes/d' /etc/ssh/sshd_config
+        sed -i '/X11DisplayOffset/s/^#//' /etc/ssh/sshd_config
+        sed -i '/X11UseLocalhost/s/^#//' /etc/ssh/sshd_config
+        sed -i '/PrintMotd/s/^#//' /etc/ssh/sshd_config
+        sed -i '/PrintMotd/s/yes/no/' /etc/ssh/sshd_config
+        sed -i '/PrintLastLog/s/^#//' /etc/ssh/sshd_config
+        sed -i '/TCPKeepAlive/s/^#//' /etc/ssh/sshd_config
+        sed -i '/the setting of/s/^/#/' /etc/ssh/sshd_config
+        sed -i '/RhostsRSAAuthentication and HostbasedAuthentication/s/^/#/' /etc/ssh/sshd_config
+        #}}}
+        
+        pause_function
+    fi
+}
+#}}}

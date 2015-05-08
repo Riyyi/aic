@@ -77,9 +77,9 @@ select_user(){
                             1)
                                 package_install "git"
                                 git clone https://github.com/helmuthdu/vim
-                                mv vim /home/${username}/.vim
-                                ln -sf /home/${username}/.vim/vimrc /home/${username}/.vimrc
-                                cp -R vim /home/${username}/.vim/fonts /home/${username}/.fonts
+                                mv vim /home/"${username}"/.vim
+                                ln -sf /home/"${username}"/.vim/vimrc /home/"${username}"/.vimrc
+                                cp -R vim /home/"${username}"/.vim/fonts /home/"${username}"/.fonts
                                 ;;
                             2)
                                 echo "Nothing to do..."
@@ -88,16 +88,16 @@ select_user(){
                                 package_install "git"
                                 read -p "Enter your github username [ex: helmuthdu]: " GITHUB_USER
                                 read -p "Enter your github repository [ex: vim]: " GITHUB_REPO
-                                git clone https://github.com/$GITHUB_USER/$GITHUB_REPO
-                                cp -R $GITHUB_REPO/.vim /home/${username}/
+                                git clone https://github.com/"$GITHUB_USER"/"$GITHUB_REPO"
+                                cp -R "$GITHUB_REPO"/.vim /home/"${username}"/
                                 
                                 if [[ -f $GITHUB_REPO/vimrc ]]; then
-                                    ln -sf /home/${username}/.vim/vimrc /home/${username}/.vimrc
+                                    ln -sf /home/"${username}"/.vim/vimrc /home/"${username}"/.vimrc
                                 else
-                                    ln -sf /home/${username}/.vim/.vimrc /home/${username}/.vimrc
+                                    ln -sf /home/"${username}"/.vim/.vimrc /home/"${username}"/.vimrc
                                 fi
                                 
-                                rm -fr $GITHUB_REPO
+                                rm -fr "$GITHUB_REPO"
                                 ;;
                             *)
                                 invalid_option
@@ -118,12 +118,12 @@ select_user(){
     done
     #}}}
 
-    chown -R ${username}:users /home/${username}
+    chown -R "${username}":users /home/"${username}"
     }
     #}}}
 
     print_title "SELECT/CREATE USER - https://wiki.archlinux.org/index.php/Users_and_Groups"
-    users_list=(`cat /etc/passwd | grep "/home" | cut -d: -f1`);
+    users_list=$(grep "/home" /etc/passwd | cut -d: -f1);
     PS3="$prompt1"
     echo "Avaliable Users:"
 

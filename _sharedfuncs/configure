@@ -41,3 +41,23 @@ settimezone() { #{{{
     done
   } #}}}
 #}}}
+
+add_repository() { #{{{
+    local _repo=${1}
+    local _url=${2}
+    [[ -n ${3} ]] && local _siglevel="\nSigLevel = ${3}" || local _siglevel=""
+
+    local _check_repo=`grep -F "${_repo}" /etc/pacman.conf`
+    if [[ -z $_check_repo ]]; then
+        echo -e "\n[${_repo}]${_siglevel}\nServer = ${_url}" >> /etc/pacman.conf
+        system_update
+    fi
+} #}}}
+
+add_line() { #{{{
+    local _add_line=${1}
+    local _filepath=${2}
+
+    local _has_line=`grep -ci "${_add_line}" ${_filepath}`
+    [[ $_has_line -eq 0 ]] && echo "${_add_line}" >> ${_filepath}
+} #}}}
