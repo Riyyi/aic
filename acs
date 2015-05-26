@@ -50,7 +50,7 @@ do
         install_samba
         install_tlp
         enable_readahead
-        install_zram
+        install_zram # automode
         install_video_cards
         install_xorg
         font_config

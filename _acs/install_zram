@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#ZRAM {{{
+install_zram (){
+  print_title "ZRAM - https://wiki.archlinux.org/index.php/Maximizing_Performance"
+  print_info "Zram creates a device in RAM and compresses it. If you use for swap means that part of the RAM can hold much more information but uses more CPU. Still, it is much quicker than swapping to a hard drive. If a system often falls back to swap, this could improve responsiveness. Zram is in mainline staging (therefore its not stable yet, use with caution)."
+  read_input_text "Install Zram" $ZRAM
+  
+  if [[ $OPTION == y ]]; then
+    aur_package_install "zramswap"
+    system_ctl enable zramswap
+    pause_function
+  fi
+}
+#}}}
