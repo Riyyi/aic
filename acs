@@ -50,12 +50,12 @@ do
         install_samba
         install_tlp
         enable_readahead
-        install_zram # automode
+        install_zram
         install_video_cards
         install_xorg
-        font_config
+        font_config # automode
         install_cups
-        install_additional_firmwares
+        install_additional_firmwares # elihw
         install_git_tor
         checklist[1]=1
         ;;

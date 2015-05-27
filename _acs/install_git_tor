@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#GIT ACCESS THRU A FIREWALL {{{
+install_git_tor(){
+    print_title "GIT-TOR - https://wiki.archlinux.org/index.php/Tor"
+    print_info "Tor is an open source implementation of 2nd generation onion routing that provides free access to an anonymous proxy network. Its primary goal is to enable online anonymity by protecting against traffic analysis attacks."
+  
+    read_input_text "Ensuring access to GIT through a firewall (bypass college/work firewall)" $GITTOR
+  
+    if [[ $OPTION == y ]]; then
+        package_install "openbsd-netcat vidalia privoxy git"
+        
+        if [[ ! -f /usr/bin/proxy-wrapper ]]; then
+            echo 'forward-socks5   /               127.0.0.1:9050 .' >> /etc/privoxy/config
+            echo -e '#!/bin/bash\nnc -xlocalhost:9050 -X5 $*' > /usr/bin/proxy-wrapper
+            chmod +x /usr/bin/proxy-wrapper
+            echo -e '\nexport GIT_PROXY_COMMAND="/usr/bin/proxy-wrapper"' >> /etc/bash.bashrc
+            export GIT_PROXY_COMMAND="/usr/bin/proxy-wrapper"
+            su - ${username} -c 'export GIT_PROXY_COMMAND="/usr/bin/proxy-wrapper"'
+        fi
+        
+        groupadd -g 42 privoxy
+        useradd -u 42 -g privoxy -s /bin/false -d /etc/privoxy privoxy
+        system_ctl start tor
+        system_ctl start privoxy
+        system_ctl enable tor
+        system_ctl enable privoxy
+        pause_function
+    fi
+}
+#}}}

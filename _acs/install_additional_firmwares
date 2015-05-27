@@ -1,0 +1,97 @@
+#!/bin/bash
+
+#ADDITIONAL FIRMWARE {{{
+install_additional_firmwares(){
+    print_title "INSTALL ADDITIONAL FIRMWARES"
+  
+    read_input_text "Install additional firmwares [Audio,Bluetooth,Scanner,Wireless]" $FIRMWARE
+  
+    if [[ $OPTION == y ]]; then
+        while true
+        do
+            print_title "INSTALL ADDITIONAL FIRMWARES"
+            echo " 1) $(menu_item "aic94xx-firmware") $AUR"
+            echo " 2) $(menu_item "alsa-firmware")"
+            echo " 3) $(menu_item "b43-firmware") $AUR"
+            echo " 4) $(menu_item "b43-firmware-legacy") $AUR"
+            echo " 5) $(menu_item "bfa-firmware") $AUR"
+            echo " 6) $(menu_item "bluez-firmware") [Broadcom BCM203x/STLC2300 Bluetooth]"
+            echo " 7) $(menu_item "broadcom-wl") $AUR"
+            echo " 8) $(menu_item "ipw2100-fw")"
+            echo " 9) $(menu_item "ipw2200-fw")"
+            echo "10) $(menu_item "libffado") [Fireware Audio Devices]"
+            echo "11) $(menu_item "libmtp") [Android Devices]"
+            echo "12) $(menu_item "libraw1394") [IEEE1394 Driver]"
+            echo ""
+            echo " d) DONE"
+            echo ""
+            FIRMWARE_OPTIONS+=" d"
+            
+            read_input_options "$FIRMWARE_OPTIONS"
+            
+            for OPT in ${OPTIONS[@]}; do
+                case "$OPT" in
+                    1)
+                        aur_package_install "aic94xx-firmware"
+                        ;;
+                        
+                    2)
+                        package_install "alsa-firmware"
+                        ;;
+                        
+                    3)
+                        aur_package_install "b43-firmware"
+                        ;;
+                        
+                    4)
+                        aur_package_install "b43-firmware-legacy"
+                        ;;
+                        
+                    5)
+                        aur_package_install "bfa-firmware"
+                        ;;
+                        
+                    6)
+                        package_install "bluez-firmware"
+                        ;;
+                        
+                    7)
+                        aur_package_install "broadcom-wl"
+                        ;;
+                        
+                    8)
+                        package_install "ipw2100-fw"
+                        ;;
+                        
+                    9)
+                        package_install "ipw2200-fw"
+                        ;;
+                        
+                    10)
+                        package_install "libffado"
+                        ;;
+                        
+                    11)
+                        package_install "libmtp"
+                        aur_package_install "android-udev"
+                        ;;
+                        
+                    12)
+                        package_install "libraw1394"
+                        ;;
+
+                    "d")
+                        break
+                        ;;
+
+                    *)
+                        invalid_option
+                        ;;
+                esac
+            done
+            
+            elihw
+        done
+    fi
+}
+#}}}
