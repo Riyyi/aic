@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#ksuperkey
+#breeze-kde4
+
+#config_xinitrc
+#system_ctl
+
+#DESKTOP ENVIRONMENT {{{
+install_desktop_environment(){
+    print_title "DESKTOP ENVIRONMENT|WINDOW MANAGER"
+    print_info "A DE provide a complete GUI for a system by bundling together a variety of X clients written using a common widget toolkit and set of libraries.\n\nA window manager is one component of a system's graphical user interface."
+
+    echo -e "Select your DE or WM:\n"
+    echo " --- DE ---         --- WM ---"
+    echo " 1) Cinnamon        10) Awesome"
+    echo " 2) Deepin          11) Fluxbox"
+    echo " 3) Enlightenment   12) i3"
+    echo " 4) GNOME           13) OpenBox"
+    echo " 5) KDE4            14) Xmonad"
+    echo " 6) KDE5"
+    echo " 7) LXQT"
+    echo " 8) Mate"
+    echo " 9) XFCE"
+    echo ""
+    echo " b) BACK"
+    
+    read_input $DESKTOPENV
+    
+    case "$OPTION" in
+        6)
+            #KDE5 {{{
+            print_title "KDE - https://wiki.archlinux.org/index.php/KDE"
+            print_info "KDE is an international free software community producing an integrated set of cross-platform applications designed to run on Linux, FreeBSD, Microsoft Windows, Solaris and Mac OS X systems. It is known for its Plasma Desktop, a desktop environment provided as the default working environment on many Linux distributions."
+            package_install "kf5 kf5-aids plasma sddm"
+            # config xinitrc
+            config_xinitrc "startkde"
+            system_ctl enable sddm
+            
+            package_install "kde-gtk-config oxygen-gtk2 oxygen-gtk3 qtcurve breeze-kde4"
+            package_install "k3b kdesu"
+            aur_ackage_install "libappindicator-gtk2 libappindicator-gtk3 sni-qt lib32-sni-qt"
+            aur_package_install "flattr-icons-kde"
+            aur_package_install "ksuperkey kdeplasma-applets-homerun"
+            is_package_installed "cups" && package_install "kdeutils-print-manager"
+            
+            # Remove the Cashew (find KDE 5 location)
+            #rm /usr/share/kde4/services/plasma-toolbox-desktoptoolbox.desktop
+            #rm /usr/share/kde4/services/plasma-toolbox-nettoolbox.desktop
+            #rm /usr/share/kde4/services/plasma-toolbox-paneltoolbox.desktop
+    
+            KDE=1
+            if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+                pause_function
+            fi
+            ;;
+            #}}}
+            
+        *)
+            invalid_option
+            install_desktop_environment
+            ;;
+    esac
+}
+#}}}

@@ -47,6 +47,8 @@ font_config(){
         esac
     done
   
-  pause_function
+    if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+        pause_function
+    fi
 }
 #}}}
