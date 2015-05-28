@@ -151,7 +151,7 @@ check_vga() { #{{{
         VIDEO_DRIVER="bumblebee"
     elif [[ -n $(echo ${_vga} | grep "nvidia") || -f /sys/kernel/debug/dri/0/vbios.rom ]]; then
         cecho Nvidia
-        read_input_text "Install NVIDIA proprietary driver" $PROPRIETARY_DRIVER
+        read_input_text "Install NVIDIA proprietary driver: y/N" $PROPRIETARY_DRIVER
         
         if [[ $OPTION == y ]]; then
             VIDEO_DRIVER="nvidia"

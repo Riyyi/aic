@@ -25,6 +25,10 @@
     READAHEAD="y"
     ZRAM="n"
     PROPRIETARY_DRIVER="n" # Proprietary (NVIDIA) driver
+    # 1) nvidia
+    # 2) nvidia-340xx
+    # 3) nvidia-304xx
+    LEGACY_DRIVER="1"      # Legacy (NVIDIA) driver
     CUPS="n"
     FIRMWARE="y"           # Install custom firmwares
     GITTOR="n"
