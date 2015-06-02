@@ -57,6 +57,7 @@ install_desktop_environment(){
             #}}}
             
         *)
+            clear # check to see if necessary
             invalid_option
             install_desktop_environment
             ;;

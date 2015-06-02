@@ -197,6 +197,10 @@ contains_element() { #{{{
     for e in "${@:2}"; do [[ $e == $1 ]] && break; done;
 } #}}}
 
+elihw() { #{{{
+    [[ $OPT == b || $OPT == d ]] && break;
+} #}}}
+
 getkeymap() { #{{{
     local _keymaps=(`localectl list-keymaps`)
     PS3="(shift+pgup/pgdown) $prompt1"

@@ -54,3 +54,31 @@
         FIRMWARE_OPTIONS="11"
     #}}}
 #}}}
+
+#DESKTOP ENVIRONMENT|WINDOW MANAGER {{{
+  # 1) Cinnamon
+  # 2) Deepin
+  # 3) Enlightenment
+  # 4) GNOME
+  # 5) KDE4
+  # 6) KDE5
+  # 7) LXQT
+  # 8) Mate
+  # 9) XFCE
+  #10) Awesome
+  #11) Fluxbox
+  #12) i3
+  #13) OpenBox
+  #14) Xmonad
+  DESKTOPENV="6"
+#}}}
+
+#NETWORK MANAGER {{{
+  # 1) NetworkManager
+  # 2) Wicd
+  # 3) ConnMan
+  # n) None
+  NETWORKMANAGER="1"
+  #USB 3G MODEM SUPPORT
+  USBMODEM="y"
+#}}}

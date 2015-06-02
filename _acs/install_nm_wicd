@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#CONNMAN/NETWORKMANAGER/WICD {{{
+install_nm_wicd(){
+    print_title "NETWORK MANAGER"
+    echo " 1) Networkmanager"
+    echo " 2) Wicd"
+    echo " 3) ConnMan"
+    echo ""
+    echo " n) NONE"
+    echo ""
+    
+    read_input $NETWORKMANAGER
+    
+    case "$OPTION" in
+        1)
+            print_title "NETWORKMANAGER - https://wiki.archlinux.org/index.php/Networkmanager"
+            print_info "NetworkManager is a program for providing detection and configuration for systems to automatically connect to network. NetworkManager's functionality can be useful for both wireless and wired networks."
+
+            if [[ ${KDE} -eq 1 ]]; then
+                is_package_installed "plasma" && aur_package_install "plasma-nm" || package_install "networkmanager dnsmasq kdeplasma-applets-plasma-nm"
+            else
+                package_install "networkmanager dnsmasq network-manager-applet"
+            fi
+
+            package_install "networkmanager-openconnect networkmanager-openvpn networkmanager-pptp networkmanager-vpnc"
+            is_package_installed "ntp" && package_install "networkmanager-dispatcher-ntpd"
+            # Network Management daemon
+            system_ctl enable NetworkManager
+            pause_function
+            ;;
+
+        2)
+            print_title "WICD - https://wiki.archlinux.org/index.php/Wicd"
+            print_info "Wicd is a network connection manager that can manage wireless and wired interfaces, similar and an alternative to NetworkManager."
+            
+            if [[ ${KDE} -eq 1 ]]; then
+                aur_package_install "wicd wicd-kde"
+            else
+                package_install "wicd wicd-gtk"
+            fi
+            
+            # WICD daemon
+            system_ctl enable wicd
+            pause_function
+            ;;
+
+        3)
+            print_title "CONNMAN - https://wiki.archlinux.org/index.php/Connman"
+            print_info "ConnMan is an alternative to NetworkManager and Wicd and was created by Intel and the Moblin project for use with embedded devices."
+            package_install "connman"
+            # ConnMan daemon
+            system_ctl enable connman
+            pause_function
+            ;;
+    esac
+}
+#}}}

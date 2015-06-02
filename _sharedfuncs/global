@@ -31,6 +31,12 @@
         prompt3="You have to manually enter the following commands, then press ${BYellow}ctrl+d${Reset} or type ${BYellow}exit${Reset}:"
     #}}}
     
+    # DESKTOP ENVIRONMENT{{{
+        CINNAMON=0
+        GNOME=0
+        KDE=0
+    #}}}
+    
     # MOUNTPOINTS {{{
         EFI_MOUNTPOINT="/boot/efi"
         ROOT_MOUNTPOINT="/dev/sda1"
@@ -38,6 +44,10 @@
         MOUNTPOINT="/mnt"
     #}}}
     
+    ARCHI=`uname -m` # ARCHITECTURE
+    UEFI=0
+    AUR=`echo -e "(${BPurple}aur${Reset})"`
+    EXTERNAL=`echo -e "(${BYellow}external${Reset})"`
     AUI_DIR=`pwd` #CURRENT DIRECTORY
     LOG="${AUI_DIR}/`basename ${0}`_error.log" # LOG FILE
     [[ -f $LOG ]] && rm -f $LOG
