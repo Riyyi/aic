@@ -138,7 +138,7 @@ auto_partition(){
         partition_number=$((partition_number+1))
     else
         # MBR partition table
-        patition_table=o
+        partition_table=o
     fi
     
     # Swap (Linux swap / Solaris)
@@ -147,7 +147,7 @@ auto_partition(){
         p
         $partition_number
         
-        $SWAP_SIZE
+        +$SWAP_SIZE
         t
         $partition_number
         82
@@ -163,7 +163,7 @@ auto_partition(){
         p
         $partition_number
         
-        $HOME_SIZE
+        +$HOME_SIZE
         "
         
         # Increment current partion
@@ -171,9 +171,6 @@ auto_partition(){
     fi
     
     # Create the new partitions
-    echo "$partition_table" | fdisk ${DEVICE}
-    exit
-    
     echo "$partition_table
     $boot
     $swap
@@ -184,13 +181,6 @@ auto_partition(){
 
     
     w" | fdisk ${DEVICE}
-    
-    #efi = 1
-    #mkfs.fat -F32 /dev/sdxY
-    
-    #swap = 82 (Linux swap / Solaris)
-    # mkswap /dev/sdxY
-    # swapon /dev/sdxY
 }
 #}}}
 

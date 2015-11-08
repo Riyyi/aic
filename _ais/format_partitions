@@ -212,3 +212,8 @@ format_partitions(){
   pause_function
 }
 #}}}
+
+#mkfs.fat -F32 /dev/sdxY
+
+# mkswap /dev/sdxY
+# swapon /dev/sdxY
