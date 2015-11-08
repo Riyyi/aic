@@ -6,15 +6,15 @@ select_device(){
     PS3="$prompt1"
     echo -e "Select partition:\n"
     
-    select device in "${devices_list[@]}"; do
-        if contains_element "${device}" "${devices_list[@]}"; then
+    select DEVICE in "${devices_list[@]}"; do
+        if contains_element "${DEVICE}" "${devices_list[@]}"; then
             break
         else
             invalid_option
         fi
     done
     
-    BOOT_MOUNTPOINT=$device
+    BOOT_MOUNTPOINT=$DEVICE
 }
 #}}}
 
@@ -29,10 +29,10 @@ create_partition(){
             select_device
             case $OPT in
                 parted)
-                    parted -a opt ${device}
+                    parted -a opt ${DEVICE}
                     ;;
                 *)
-                    $OPT ${device}
+                    $OPT ${DEVICE}
                     ;;
                 esac
             break
@@ -113,6 +113,84 @@ setup_luks(){
 }
 #}}}
 
+#AUTO PARTITION {{{
+auto_partition(){
+    # Number of the current partition
+    partition_number=1
+    
+    # UEFI (EFI System)
+    if [[ $UEFI -e 1 ]]; then
+        # GPT partition table
+        partition_table=g
+        
+        # /boot partition
+        boot="n
+        p
+        $partition_number
+        
+        +256M
+        t
+        $partition_number
+        1
+        "
+        
+        # Increment current partion
+        partition_number=$((partition_number+1))
+    else
+        # MBR partition table
+        patition_table=o
+    fi
+    
+    # Swap (Linux swap / Solaris)
+    if [[ $SWAP_SIZE != "" ]]; then
+        swap="n
+        p
+        $partition_number
+        
+        $SWAP_SIZE
+        t
+        $partition_number
+        82
+        "
+        
+        # Increment current partion
+        partition_number=$((partition_number+1))
+    fi
+    
+    # Home
+    if [[ $HOME_SIZE != "" ]]; then
+        home="n
+        p
+        $partition_number
+        
+        $HOME_SIZE
+        "
+        
+        # Increment current partion
+        partition_number=$((partition_number+1))
+    fi
+    
+    # Create the new partitions
+    echo "$partition_table
+    $boot
+    $swap
+    $home
+    n
+    p
+    $partition_number
+
+    
+    w" | fdisk ${DEVICE}
+    
+    #efi = 1
+    #mkfs.fat -F32 /dev/sdxY
+    
+    #swap = 82 (Linux swap / Solaris)
+    # mkswap /dev/sdxY
+    # swapon /dev/sdxY
+}
+#}}}
+
 #CREATE PARTITION SCHEME {{{
 create_partition_scheme(){
     LUKS=0
@@ -122,34 +200,38 @@ create_partition_scheme(){
     print_info "Partitioning a hard drive allows one to logically divide the available space into sections that can be accessed independently of one another."
     print_warning "Maintain Current does not work with LUKS"
 
-    partition_layout=("Default" "LVM" "LVM+LUKS" "Maintain Current")
-    PS3="$prompt1"
-    echo -e "Select partition scheme:"
-  
-    select OPT in "${partition_layout[@]}"; do
-        case "$REPLY" in
-            1)
-                create_partition
-                ;;
-            2)
-                create_partition
-                setup_lvm
-                ;;
-            3)
-                create_partition
-                setup_luks
-                setup_lvm
-                ;;
-            4)
-                modprobe dm-mod
-                vgscan &> /dev/null
-                vgchange -ay &> /dev/null
-                ;;
-            *)
-                invalid_option
-                ;;
-        esac
-        [[ -n $OPT ]] && break
-    done
+    if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+        partition_layout=("Default" "LVM" "LVM+LUKS" "Maintain Current")
+        PS3="$prompt1"
+        echo -e "Select partition scheme:"
+    
+        select OPT in "${partition_layout[@]}"; do
+            case "$REPLY" in
+                1)
+                    create_partition
+                    ;;
+                2)
+                    create_partition
+                    setup_lvm
+                    ;;
+                3)
+                    create_partition
+                    setup_luks
+                    setup_lvm
+                    ;;
+                4)
+                    modprobe dm-mod
+                    vgscan &> /dev/null
+                    vgchange -ay &> /dev/null
+                    ;;
+                *)
+                    invalid_option
+                    ;;
+            esac
+            [[ -n $OPT ]] && break
+        done
+    else
+        auto_partition
+    fi
 }
 #}}}

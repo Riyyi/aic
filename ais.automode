@@ -50,10 +50,15 @@
     # "ES" "LK" "SE" "CH" "TW"
     # "TR" "UA" "GB" "US" "UZ"
     # "VN"
-    country_code="NL"                    # Select closest country to you
+    COUNTRY_CODE="NL"                    # Select closest country to you
 #}}}
 
 #PARTITION SCHEME {{{
+    DEVICE="/dev/sda"
+    # Create a swap/home partition and the size (K,M,G,T,P)
+    # Ex: "512M" or "2G" or "1T"
+    SWAP_SIZE=""
+    HOME_SIZE="15G"
 #}}}
 
 #CONFIGURE FSTAB {{{

@@ -12,7 +12,7 @@ configure_mirrorlist(){
         
         select country_name in "${countries_name[@]}"; do
             if contains_element "$country_name" "${countries_name[@]}"; then
-                country_code=${countries_code[$(( $REPLY - 1 ))]}
+                COUNTRY_CODE=${countries_code[$(( $REPLY - 1 ))]}
                 break
             else
                 invalid_option
@@ -29,7 +29,7 @@ configure_mirrorlist(){
         read_input_text "Confirm country: $country_name"
     done
 
-    url="https://www.archlinux.org/mirrorlist/?country=${country_code}&use_mirror_status=on"
+    url="https://www.archlinux.org/mirrorlist/?country=${COUNTRY_CODE}&use_mirror_status=on"
 
     tmpfile=$(mktemp --suffix=-mirrorlist)
 
