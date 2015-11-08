@@ -119,7 +119,7 @@ auto_partition(){
     partition_number=1
     
     # UEFI (EFI System)
-    if [[ $UEFI -e 1 ]]; then
+    if [[ $UEFI -eq 1 ]]; then
         # GPT partition table
         partition_table=g
         
@@ -171,6 +171,9 @@ auto_partition(){
     fi
     
     # Create the new partitions
+    echo "$partition_table" | fdisk ${DEVICE}
+    exit
+    
     echo "$partition_table
     $boot
     $swap

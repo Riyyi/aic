@@ -17,4 +17,5 @@ else
 fi
 
 source ${AUI_DIR}/ais.automode
+AUTOMATIC_MODE=1
 create_partition_scheme
