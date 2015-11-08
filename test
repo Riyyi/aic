@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ -f `pwd`/sharedfuncs ]]; then
+  . sharedfuncs
+else
+  echo "Missing file: sharedfuncs"
+  exit 1
+fi
+
+if [ -d _ais ]; then
+    for files in _ais/*; do
+        . $files
+    done
+else
+  echo "Missing directory: _ais"
+  exit 1
+fi
+
+source ${AUI_DIR}/ais.automode
+create_partition_scheme

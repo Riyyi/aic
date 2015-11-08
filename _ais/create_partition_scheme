@@ -201,10 +201,10 @@ create_partition_scheme(){
     print_warning "Maintain Current does not work with LUKS"
 
     if [[ $AUTOMATIC_MODE -ne 1 ]]; then
+        echo "AUTOMATIC MODE NOT ENABLED"
         partition_layout=("Default" "LVM" "LVM+LUKS" "Maintain Current")
         PS3="$prompt1"
         echo -e "Select partition scheme:"
-    
         select OPT in "${partition_layout[@]}"; do
             case "$REPLY" in
                 1)
