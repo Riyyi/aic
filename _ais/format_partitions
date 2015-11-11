@@ -148,17 +148,20 @@ format_partitions(){
     if [[ $AUTOMATIC_MODE -eq 1 ]]; then
         if [[ $UEFI -eq 1 ]]; then
             format_partition "${MOUNTPOINT}${i}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
-            echo "Partition: $i\n"
+            i=$(( i + 1 ))
+            echo "Partition: $i"
         fi
         
         if [[ $SWAP_SIZE != "" ]]; then
             format_swap_partition "${MOUNTPOINT}${i}"
-            echo "Partition: $i\n"
+            i=$(( i + 1 ))
+            echo "Partition: $i"
         fi
         
         if [[ $HOME_SIZE != "" ]]; then
             format_partition "${MOUNTPOINT}${i}" "${MOUNTPOINT}/home" ext4
-            echo "Partition: $i\n"
+            i=$(( i + 1 ))
+            echo "Partition: $i"
         fi
         
         ROOT_PART=`echo ${MOUNTPOINT}${i} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
