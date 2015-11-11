@@ -134,7 +134,7 @@ auto_partition(){
         1
         "
         
-        # Increment current partion
+        # Increment current partition
         partition_number=$((partition_number+1))
     else
         # MBR partition table
@@ -153,7 +153,7 @@ auto_partition(){
         82
         "
         
-        # Increment current partion
+        # Increment current partition
         partition_number=$((partition_number+1))
     fi
     
@@ -166,7 +166,7 @@ auto_partition(){
         +$HOME_SIZE
         "
         
-        # Increment current partion
+        # Increment current partition
         partition_number=$((partition_number+1))
     fi
     

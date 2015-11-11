@@ -145,75 +145,99 @@ format_partitions(){
         done
     }
 
-    while true; do
-        PS3="$prompt1"
-        if [[ ${partition_name[i]} == swap ]]; then
-            create_swap
-        else
-            echo -e "Select ${BYellow}${partition_name[i]}${Reset} partition:\n"
-          
-            select partition in "${partitions_list[@]}"; do
-                #get the selected number - 1
-                partition_number=$(( $REPLY - 1 ))
-                
-                if contains_element "${partition}" "${partitions_list[@]}"; then
-                    case ${partition_name[i]} in
-                        root)
-                            ROOT_PART=`echo ${partition} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
-                            ROOT_MOUNTPOINT=${partition}
-                            format_partition "${partition}" "${MOUNTPOINT}"
-                            ;;
-                        EFI)
-                            set_efi_partition
-                            read_input_text "Format ${partition} partition"
-                            if [[ $OPTION == y ]]; then
-                                format_partition "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
-                            else
-                                mkdir -p "${MOUNTPOINT}${EFI_MOUNTPOINT}"
-                                mount -t vfat "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}"
-                                check_mountpoint "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}"
-                            fi
-                            ;;
-                        another)
-                            read -p "Mountpoint [ex: /home]:" directory
-                            [[ $directory == "/boot" ]] && BOOT_MOUNTPOINT=`echo ${partition} | sed 's/[0-9]//'`
-                            select_filesystem
-                            read_input_text "Format ${partition} partition"
-                            
-                            if [[ $OPTION == y ]]; then
-                                format_partition "${partition}" "${MOUNTPOINT}${directory}" "${filesystem}"
-                            else
-                                read_input_text "Confirm fs="${filesystem}" part="${partition}" dir="${directory}""
-                              
+    if [[ $AUTOMATIC_MODE -eq 1 ]]; then
+        if [[ $UEFI -eq 1 ]]; then
+            format_partition "${MOUNTPOINT}${i}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
+            echo "Partition: $i\n"
+        fi
+        
+        if [[ $SWAP_SIZE != "" ]]; then
+            format_swap_partition "${MOUNTPOINT}${i}"
+            echo "Partition: $i\n"
+        fi
+        
+        if [[ $HOME_SIZE != "" ]]; then
+            format_partition "${MOUNTPOINT}${i}" "${MOUNTPOINT}/home" ext4
+            echo "Partition: $i\n"
+        fi
+        
+        ROOT_PART=`echo ${MOUNTPOINT}${i} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
+        ROOT_MOUNTPOINT=${MOUNTPOINT}${i}
+        format_partition "${MOUNTPOINT}${i}" "${MOUNTPOINT}"
+        echo "Partition: $i\n"
+        exit
+    else
+        while true; do
+            PS3="$prompt1"
+            if [[ ${partition_name[i]} == swap ]]; then
+                create_swap
+            else
+                echo -e "Select ${BYellow}${partition_name[i]}${Reset} partition:\n"
+            
+                select partition in "${partitions_list[@]}"; do
+                    #get the selected number - 1
+                    partition_number=$(( $REPLY - 1 ))
+                    
+                    if contains_element "${partition}" "${partitions_list[@]}"; then
+                        case ${partition_name[i]} in
+                            root)
+                                ROOT_PART=`echo ${partition} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
+                                ROOT_MOUNTPOINT=${partition}
+                                format_partition "${partition}" "${MOUNTPOINT}"
+                                ;;
+                            EFI)
+                                set_efi_partition
+                                read_input_text "Format ${partition} partition"
                                 if [[ $OPTION == y ]]; then
-                                    mkdir -p ${MOUNTPOINT}${directory}
-                                    mount -t ${filesystem} ${partition} ${MOUNTPOINT}${directory}
-                                    check_mountpoint "${partition}" "${MOUNTPOINT}${directory}"
+                                    format_partition "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
+                                else
+                                    mkdir -p "${MOUNTPOINT}${EFI_MOUNTPOINT}"
+                                    mount -t vfat "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}"
+                                    check_mountpoint "${partition}" "${MOUNTPOINT}${EFI_MOUNTPOINT}"
                                 fi
-                            fi
-                            ;;
-                    esac
-                    break
-                else
-                    invalid_option
-                fi
-            done
-        fi
+                                ;;
+                            another)
+                                read -p "Mountpoint [ex: /home]:" directory
+                                [[ $directory == "/boot" ]] && BOOT_MOUNTPOINT=`echo ${partition} | sed 's/[0-9]//'`
+                                select_filesystem
+                                read_input_text "Format ${partition} partition"
+                                
+                                if [[ $OPTION == y ]]; then
+                                    format_partition "${partition}" "${MOUNTPOINT}${directory}" "${filesystem}"
+                                else
+                                    read_input_text "Confirm fs="${filesystem}" part="${partition}" dir="${directory}""
+                                
+                                    if [[ $OPTION == y ]]; then
+                                        mkdir -p ${MOUNTPOINT}${directory}
+                                        mount -t ${filesystem} ${partition} ${MOUNTPOINT}${directory}
+                                        check_mountpoint "${partition}" "${MOUNTPOINT}${directory}"
+                                    fi
+                                fi
+                                ;;
+                        esac
+                        break
+                    else
+                        invalid_option
+                    fi
+                done
+            fi
+        
+            #check if there is no partitions left
+            if [[ ${#partitions_list[@]} -eq 0 && ${partition_name[i]} != swap ]]; then
+                break
+            elif [[ ${partition_name[i]} == another ]]; then
+                read_input_text "Configure more partitions"
+                [[ $OPTION != y ]] && break
+            fi
+        done
     
-        #check if there is no partitions left
-        if [[ ${#partitions_list[@]} -eq 0 && ${partition_name[i]} != swap ]]; then
-            break
-        elif [[ ${partition_name[i]} == another ]]; then
-            read_input_text "Configure more partitions"
-            [[ $OPTION != y ]] && break
-        fi
-    done
-  
-  pause_function
+        pause_function
+    fi
 }
 #}}}
 
 #mkfs.fat -F32 /dev/sdxY
 
+#format_swap_partition "${partition}"
 # mkswap /dev/sdxY
 # swapon /dev/sdxY
