@@ -158,27 +158,27 @@ format_partitions(){
             partition_number=$((partition_number+1))
         fi        
         
-        ROOT_PART=`echo ${MOUNTPOINT}${partition_number} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
-        ROOT_MOUNTPOINT=${MOUNTPOINT}${partition_number}
-        format_partition "${MOUNTPOINT}${partition_number}" "${MOUNTPOINT}"
-        echo "Partition: ${MOUNTPOINT}${partition_number}"
+        ROOT_PART=`echo ${DEVICE}${partition_number} | sed 's/\/dev\/mapper\///' | sed 's/\/dev\///'`
+        ROOT_MOUNTPOINT=${DEVICE}${partition_number}
+        format_partition "${DEVICE}${partition_number}" "${MOUNTPOINT}"
+        echo "Partition: ${DEVICE}${partition_number}"
         
         partition_number=1
         if [[ $UEFI -eq 1 ]]; then
-            format_partition "${MOUNTPOINT}${partition_number}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
-            echo "Partition: ${MOUNTPOINT}${partition_number}"
+            format_partition "${DEVICE}${partition_number}" "${MOUNTPOINT}${EFI_MOUNTPOINT}" vfat
+            echo "Partition: ${DEVICE}${partition_number}"
             partition_number=$((partition_number+1))
         fi
         
         if [[ $SWAP_SIZE != "" ]]; then
-            format_swap_partition "${MOUNTPOINT}${partition_number}"
-            echo "Partition: ${MOUNTPOINT}${partition_number}"
+            format_swap_partition "${DEVICE}${partition_number}"
+            echo "Partition: ${DEVICE}${partition_number}"
             partition_number=$((partition_number+1))
         fi
         
         if [[ $HOME_SIZE != "" ]]; then
-            format_partition "${MOUNTPOINT}${partition_number}" "${MOUNTPOINT}/home" ext4
-            echo "Partition: ${MOUNTPOINT}${partition_number}"
+            format_partition "${DEVICE}${partition_number}" "${MOUNTPOINT}/home" ext4
+            echo "Partition: ${DEVICE}${partition_number}"
             partition_number=$((partition_number+1))
         fi
         
